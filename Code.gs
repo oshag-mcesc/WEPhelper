@@ -6,17 +6,31 @@
  * @param {array} theData the array of data values
  * @param {string} fileID the ID of the template file
  * @param {string} folderID the ID of the destination folder
+ * @param {integer} wepType the type of wep 1 = Mid Year, 2 = Final Eval missing will be Initial
  * @return {list} the code will fill in the DocIDs column
  */
 
 
-function createDocs(sheet, theData, fileID, folderID) {
+function createDocs(sheet, theData, fileID, folderID, wepType) {
   //Get the data and change to an object
   var data =ObjApp.rangeToObjects(theData);
   
   //get the template file and destination folder
   var file = DriveApp.getFileById(fileID);
   var folder = DriveApp.getFolderById(folderID);
+  
+  //set the WEP type
+  var theType
+  if(wepType){
+    switch(wepType){
+      case 1:
+        theType = "Mid-Year Progress";
+        break;
+      case 2:
+        theType = "Final Evaluation";
+        break;
+    }    
+  }
   
   //more vars needed!!
   var docIDs = []; //array to hold all the document IDs
@@ -44,10 +58,12 @@ function createDocs(sheet, theData, fileID, folderID) {
     var giftedArea = data[rowNum].giftedarea;
     var schoolCode = data[rowNum].schoolcode;
     var returnTo = data[rowNum].returnto;
+    var studentnumber = data[rowNum].studentnumber;
+    var fileName = studName + " " + studentnumber;
     
     //make copy of the template, get the body of the new doc
     //replace the text as needed
-    var newFile = file.makeCopy(studName, folder);
+    var newFile = file.makeCopy(fileName, folder);
     var body = DocumentApp.openById(newFile.getId());
     body.replaceText('<<StudLastFirst>>', studName);
     body.replaceText('<<Grade>>',grade);
@@ -55,6 +71,7 @@ function createDocs(sheet, theData, fileID, folderID) {
     body.replaceText('<<GiftedArea>>',giftedArea);
     body.replaceText('<<SchoolCode>>',schoolCode);
     body.replaceText('<<ReturnTo>>',returnTo);
+    body.replaceText('<<WEP type>>',theType);
     
     //load the docID array
     docIDs.push([newFile.getId()]);
