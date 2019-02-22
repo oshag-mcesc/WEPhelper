@@ -49,11 +49,15 @@ function submitMiddleManForm(allData, MidManFormID){
   
   var start = new Date(); //set the start time
   
+  //NOTE: Need to uncomment/comment code for difference if doc has studNumber or not
+  
   //Loop through each row and submit
   for(var i = 0; i < theData.length; i++){
+  var filename = theData[i].studlastfirst + " " + theData[i].studentnumber;
   var resp = frm.createResponse();
   //set the values for the response
-  resp.withItemResponse(items[0].asListItem().createResponse(theData[i].studlastfirst));
+  resp.withItemResponse(items[0].asListItem().createResponse(filename));
+  //resp.withItemResponse(items[0].asListItem().createResponse(theData[i].studlastfirst));
   resp.withItemResponse(items[1].asTextItem().createResponse(theData[i].teacherlastfirst));
   resp.withItemResponse(items[2].asTextItem().createResponse(theData[i].coursename));
   resp.withItemResponse(items[3].asTextItem().createResponse(theData[i].giftedarea));
