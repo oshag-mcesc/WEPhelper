@@ -16,7 +16,7 @@ function createFinalProgressForm() {
   
   //Create the Form Items 
   form.addListItem().setTitle("Student Name");
-  form.addTextItem().setTitle("Student ID");
+  form.addTextItem().setTitle("Course Name");
   form.addTextItem().setTitle("Teacher Name");
   form.addParagraphTextItem().setTitle("Goal");
   form.addParagraphTextItem().setTitle("Mid Year Progress");
@@ -52,7 +52,7 @@ function preFilledURLsFINAL(sheet, theData, formID){
     var fileName = allData[i].studlastfirst + " " + allData[i].studid;
     var resp = form.createResponse();
     resp.withItemResponse(items[0].asListItem().createResponse(fileName));
-    resp.withItemResponse(items[1].asTextItem().createResponse(allData[i].studid));
+    resp.withItemResponse(items[1].asTextItem().createResponse(allData[i].coursename));
     resp.withItemResponse(items[2].asTextItem().createResponse(allData[i].teacherlastfirst));
     resp.withItemResponse(items[3].asParagraphTextItem().createResponse(allData[i].goal));
     resp.withItemResponse(items[4].asParagraphTextItem().createResponse(allData[i].progress));
