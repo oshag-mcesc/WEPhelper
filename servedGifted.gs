@@ -51,6 +51,7 @@ function getServedGifted(theSheet, theData, huberElem) {
   }
   
    //HARD CODED range!!!!!!!  ****************
+  theSheet.getRange("L1").setValue("Served");
   theSheet.getRange(2,12,theSheet.getLastRow(),1).setValues(bigList);
   
   return true;
