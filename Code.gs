@@ -6,18 +6,22 @@
  * @param {array} theData the array of data values
  * @param {string} fileID the ID of the template file
  * @param {string} folderID the ID of the destination folder
+ * @param {integer} startRow the row to start processing
  * @param {integer} wepType the type of wep 1 = Mid Year, 2 = Final Eval missing will be Initial
- * @return {list} the code will fill in the DocIDs column
+ * @return {object} the code will return {rowNum, done} where ronwNum is the next row to process and done if done
  */
 
 
-function createDocs(sheet, theData, fileID, folderID, wepType) {
+function createDocs(sheet, theData, fileID, folderID, startRow, wepType) {
   //Get the data and change to an object
   var data =ObjApp.rangeToObjects(theData);
   
   //get the template file and destination folder
   var file = DriveApp.getFileById(fileID);
   var folder = DriveApp.getFolderById(folderID);
+  
+  //set the start row
+  var rowNum = startRow;
   
   //set the WEP type
   var theType
@@ -31,26 +35,17 @@ function createDocs(sheet, theData, fileID, folderID, wepType) {
         break;
     }    
   }
-  
+ 
   //more vars needed!!
   var docIDs = []; //array to hold all the document IDs
-  var rowNum; //to hold the row number where stopped
-  var firstRow; //pointer to where to start processing
+  var firstRow = startRow + 2; //ObjApp removes header from range so add 2
   var start = new Date();  //set the start time for the script
-  
-  //Get script props and check
-  var scriptProps = PropertiesService.getScriptProperties();
-  if(scriptProps.getProperty("done")=="false"){
-    rowNum = Number(scriptProps.getProperty("rowNum"));
-  }
-  
-  if(!rowNum){rowNum=0}; // first time run no properties are set so we need to set this to 0
-  
-  firstRow = rowNum + 2; //ObjApp removes header from range so add 2
+  var rslts = {} //object to return info to calling script
   
   SpreadsheetApp.getActiveSpreadsheet().toast("Running....", "Creating", 2);
   
-  for(rowNum; rowNum < data.length; rowNum++){
+  var dataLength = data.length;
+  for(rowNum; rowNum < dataLength; rowNum++){
     //the info needed
     var firstName = data[rowNum].studfirst;
     var studName = data[rowNum].studlastfirst;
@@ -78,9 +73,8 @@ function createDocs(sheet, theData, fileID, folderID, wepType) {
     
     //check execution time ***NEED TO SET THIS TO THE CALLING SCRIPT!!!
     if(isTimeUp_(start)){
-       scriptProps.setProperties({done:"false", rowNum: rowNum+1});
-       Logger.log("Limit met!!!");
-       doneFlag = 0; //set this for the message
+       rslts = {done:"false", rowNum: rowNum+1};
+       //Logger.log("Limit met!!!");
        break; //get out if time is up!!
        }
     }
@@ -93,18 +87,12 @@ function createDocs(sheet, theData, fileID, folderID, wepType) {
     sheet.getRange(firstRow, lcol, docIDs.length).setValues(docIDs);
     
     //check if we are done
-    if(rowNum >= data.length){
-      scriptProps.setProperties({done: "true", rowNum: "0"});
+    if(rowNum >= dataLength){
+      rslts = {done: "true", rowNum: "0"};
     }
-    //give a message to let the user know
-    switch(scriptProps.getProperty("done")){
-      case "true":
-        SpreadsheetApp.getActiveSpreadsheet().toast("Got done in time!", "All done!", -1)
-        break;
-      case "false":
-         SpreadsheetApp.getActiveSpreadsheet().toast("Exceeded time limit! Please run createDocs again.", "NOT done yet!", -1)
-        break;
-    } 
+    
+  //return all info
+  return rslts;
 }
 
 
