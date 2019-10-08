@@ -33,7 +33,7 @@ function addSheetsAndUpdate(aSpreadsheet) {
     ss.insertSheet("forDocs");
     theDocs = ss.getSheetByName("forDocs");
     }
-  theDocs.getRange("A1").setFormula("=query(StudInfo,\"Select N, O, P, Q, R, S, T  order by O\",1)");
+  theDocs.getRange("A1").setFormula("=query(StudInfo,\"Select N, O, P, Q, R, S, T  where U = ''order by O\",1)");
   theDocs.setFrozenRows(1);
   
   return true;
