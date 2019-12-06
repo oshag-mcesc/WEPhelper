@@ -63,6 +63,7 @@ function createDocs(sheet, theData, fileID, folderID, startRow, wepType) {
     body.replaceText('<<StudLastFirst>>', studName);
     body.replaceText('<<Grade>>',grade);
     body.replaceText('<<StudFirst>>',firstName);
+    body.replaceText('<<StudentNumber>>',studentnumber);
     body.replaceText('<<GiftedArea>>',giftedArea);
     body.replaceText('<<SchoolCode>>',schoolCode);
     body.replaceText('<<ReturnTo>>',returnTo);

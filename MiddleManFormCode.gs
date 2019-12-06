@@ -50,7 +50,7 @@ function submitMiddleManForm(allData, MidManFormID){
   var start = new Date(); //set the start time
   
   //NOTE: Need to uncomment/comment code for difference if doc has studNumber or not
-  
+  Logger.log(theData[0].odeisandcode);
   //Loop through each row and submit
   for(var i = 0; i < theData.length; i++){
   var filename = theData[i].studlastfirst + " " + theData[i].studentnumber;

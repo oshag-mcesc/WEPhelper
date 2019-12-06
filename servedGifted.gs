@@ -22,10 +22,18 @@ function getServedGifted(theSheet, theData, huberElem) {
   if(!huberElem){
   theData.forEach(function(data){
     var gifted =[];
+    //Need to watch out for VPA!! No SC or CT in VPA classes
     if(data[0].indexOf("Superior Cognitive")>=0){
-    gifted.push(' Superior Cognitive');}
+      if(data[1].indexOf("Visual Performing Arts")<0){
+        gifted.push(' Superior Cognitive');
+      }
+    }
+      
     if(data[0].indexOf("Creative Thinking")>=0){
-    gifted.push(' Creative Thinking');}
+      if(data[1].indexOf("Visual Performing Arts")<0){
+        gifted.push(' Creative Thinking');
+      }
+    }
     
     if(data[0].indexOf(data[1])>=0){
     gifted.push(" " + data[1]);}

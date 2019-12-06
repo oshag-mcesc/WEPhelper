@@ -52,7 +52,7 @@ function preFilledURLs(sheet, theData, formID){
     var fileName = allData[i].studlastfirst + " " + allData[i].studid;
     var resp = form.createResponse();
     resp.withItemResponse(items[0].asListItem().createResponse(fileName));
-    resp.withItemResponse(items[1].asTextItem().createResponse(allData[i].studid));
+    resp.withItemResponse(items[1].asTextItem().createResponse(allData[i].studentnumber));
     resp.withItemResponse(items[2].asTextItem().createResponse(allData[i].coursename));
     resp.withItemResponse(items[3].asTextItem().createResponse(allData[i].teacherlastfirst));
     resp.withItemResponse(items[4].asParagraphTextItem().createResponse(allData[i].goal));
