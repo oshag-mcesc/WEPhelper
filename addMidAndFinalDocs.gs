@@ -6,15 +6,24 @@
 * @param {string} fldrTitle this will be the title of the new folder (ie "Mid Year", "Final")
 * @param {string} MidOrFinal this will be added to file name (ie "Mid Year", "Final")
 * @param {string} sheet the sheet to return info to
+* @param {string} folderID the ID of the folder IF it exists
 * @return {obj} info this object will have "done" and "theFolderID"
 */
 
-function createMidOrFinalDocs(docIDs,destination, fldrTitle, MidOrFinal,sheet){
+function createMidOrFinalDocs(docIDs,destination, fldrTitle, MidOrFinal,sheet, folderID){
   var info = {};
   info.done = false;
+  var theFolderID = "";
   try{
-    //create the new folder
-    var theFolderID = CreateFolder_(destination, fldrTitle);
+    //do we need to create the folder
+    if(!folderID){
+      //If not id then create the new folder
+      theFolderID = CreateFolder_(destination, fldrTitle);
+      }
+    else{
+      //already exists
+      theFolderID = folderID;
+      }
     //copy docs and move to new folder
     var rslt = copyDocs_(docIDs, theFolderID, MidOrFinal);
     //Get a list of the docs

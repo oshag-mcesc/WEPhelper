@@ -34,11 +34,13 @@ function createMidYearProgressForm() {
  * Creates a pre filled URL for the mid year progress form
  *
  * @param {obj} sheet Reference to the sheet with the data
+ * @param {obj} theData array with all the data
  * @param {string} formID The ID of the Mid Year Prgress form file
+ * @param {string} docAddName The value that was added to the docs when they were created (ie "Mid Year", "Final")
  * @return {boolean}  Returns true when done
  */
 
-function preFilledURLs(sheet, theData, formID){
+function preFilledURLs(sheet, theData, formID, docAddName){
   //get the data into an object
   var allData = ObjApp.rangeToObjects(theData);
   //get the form and form items
@@ -49,9 +51,9 @@ function preFilledURLs(sheet, theData, formID){
   //Loop through the data and set the responses. 
   //AND add the response to the PrefilledURL arrat
   for(var i = 0; i < allData.length; i++){
-    var fileName = allData[i].studlastfirst + " " + allData[i].studid;
+    var fileName = allData[i].studlastfirst + " " + allData[i].studentnumber + " - " + docAddName;
     var resp = form.createResponse();
-    resp.withItemResponse(items[0].asListItem().createResponse(fileName));
+    resp.withItemResponse(items[0].asTextItem().createResponse(fileName));
     resp.withItemResponse(items[1].asTextItem().createResponse(allData[i].studentnumber));
     resp.withItemResponse(items[2].asTextItem().createResponse(allData[i].coursename));
     resp.withItemResponse(items[3].asTextItem().createResponse(allData[i].teacherlastfirst));
