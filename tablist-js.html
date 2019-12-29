@@ -1,0 +1,35 @@
+<script>
+
+<!-- when page loads run the iniitalization code -->
+  if( document.readyState !== 'loading' ) {
+    console.log( 'document is already ready, just execute code here' );
+    myInitCode();
+  } else {
+    document.addEventListener('DOMContentLoaded', function () {
+    console.log( 'document was not ready, place code here' );
+    myInitCode();
+  });
+  }
+  
+function myInitCode() {
+  document.getElementById("btn-toggle").addEventListener("click",theAlert);
+  document.getElementById("btn-close").addEventListener("click",closeIt);
+}
+
+function theAlert(){
+  var rslts = [];
+  var cbos = document.getElementsByName("theTabs");
+  for(var i=0;i<cbos.length;i++){
+    rslts.push([cbos[i].value,cbos[i].checked]);
+  }
+  
+  google.script.run.toggleEm(rslts);
+}
+
+function closeIt(){
+  google.script.host.close();
+
+
+}
+
+</script>

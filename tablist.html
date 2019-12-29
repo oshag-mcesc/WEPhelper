@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <base target="_top">
+    <link rel="stylesheet" href="https://ssl.gstatic.com/docs/script/css/add-ons1.css">
+    <style>
+      #main{
+        margin-left: 15px;
+      }
+      #theBoxes{
+        margin-left: 15px;
+      }
+      #button-bar{
+        padding-top: 15px;      
+      }
+    </style>
+  </head>
+  <body>
+  <div id=main>
+    <h3>Here are the list of the tabs:</h3>
+    <p>Those that are checked are hidden.</p>
+    <p>To hide a tab check it's box. <br>To unhide clear the checkbox</p>
+    <div id='theBoxes'><?!= cboxes ?></div>
+    <div class="block" id="button-bar">
+      <button class="blue" id="btn-toggle">Hide/Show</button>
+      <button id="btn-close">Close</button>
+    </div>
+  </div>
+  
+  <?!= include("tablist-js")?>
+  </body>
+  
+</html>
+
+
