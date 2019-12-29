@@ -53,9 +53,10 @@ function isMissing(arg){
 }
 
 //Time check helper function
+//Google alows GSuite accounts scripts to run for 30 minutes!!  Free accounts are still 4 - 6 minutes
 function isTimeUp_(start){
   var now = new Date();
-  return now.getTime() - start.getTime() > 300000; //5 min = 300000
+  return now.getTime() - start.getTime() > 1500000; //5 min = 300000  25 min = 1500000
 }
 
 //Used to show prompt and return the input

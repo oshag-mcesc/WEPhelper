@@ -19,7 +19,7 @@ function preFilledGoalsURLs(sheet, theData, formID){
   for(var i = 0; i < allData.length; i++){
     var resp = form.createResponse();
     resp.withItemResponse(items[0].asTextItem().createResponse(allData[i].studlastfirst));
-    resp.withItemResponse(items[1].asTextItem().createResponse(allData[i].studid));
+    resp.withItemResponse(items[1].asTextItem().createResponse(allData[i].studentnumber));
     resp.withItemResponse(items[2].asTextItem().createResponse(allData[i].served));
     resp.withItemResponse(items[3].asTextItem().createResponse(allData[i].teacherlastfirst));
     resp.withItemResponse(items[4].asTextItem().createResponse(allData[i].course));
