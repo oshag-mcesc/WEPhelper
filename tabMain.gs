@@ -30,6 +30,7 @@ function createCheckBoxes() {
 
 function toggleEm(data){
   var ss = SpreadsheetApp.getActiveSpreadsheet();
+  
   data.forEach(function(row){
     var sht = ss.getSheetByName(row[0]);
     toggle_(sht,row[1]);

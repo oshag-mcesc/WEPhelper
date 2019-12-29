@@ -22,8 +22,10 @@ function theAlert(){
   for(var i=0;i<cbos.length;i++){
     rslts.push([cbos[i].value,cbos[i].checked]);
   }
+  //Needs to call a function IN the spreadsheet which THEN calls the library function
+  //take a look at this https://stackoverflow.com/questions/27673617/can-a-google-spreadsheet-apps-script-library-contain-a-user-dialog/27771542#27771542
+  google.script.run.doTabToggle(rslts);
   
-  google.script.run.toggleEm(rslts);
 }
 
 function closeIt(){
