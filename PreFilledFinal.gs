@@ -15,7 +15,8 @@ function createFinalProgressForm() {
   DriveApp.getRootFolder().removeFile(file);
   
   //Create the Form Items 
-  form.addListItem().setTitle("Student Name");
+  form.addTextItem().setTitle("Student Name");
+  form.addTextItem().setTitle("Student ID");
   form.addTextItem().setTitle("Course Name");
   form.addTextItem().setTitle("Teacher Name");
   form.addParagraphTextItem().setTitle("Goal");
@@ -38,7 +39,7 @@ function createFinalProgressForm() {
  * @return {boolean}  Returns true when done
  */
 
-function preFilledURLsFINAL(sheet, theData, formID){
+function preFilledURLsFINAL(sheet, theData, formID, docAddName){
   //get the data into an object
   var allData = ObjApp.rangeToObjects(theData);
   //get the form and form items
@@ -49,22 +50,24 @@ function preFilledURLsFINAL(sheet, theData, formID){
   //Loop through the data and set the responses. 
   //AND add the response to the PrefilledURL arrat
   for(var i = 0; i < allData.length; i++){
-    var fileName = allData[i].studlastfirst + " " + allData[i].studid;
+    var fileName = allData[i].studlastfirst + " - " + docAddName;
     var resp = form.createResponse();
-    resp.withItemResponse(items[0].asListItem().createResponse(fileName));
-    resp.withItemResponse(items[1].asTextItem().createResponse(allData[i].coursename));
-    resp.withItemResponse(items[2].asTextItem().createResponse(allData[i].teacherlastfirst));
-    resp.withItemResponse(items[3].asParagraphTextItem().createResponse(allData[i].goal));
-    resp.withItemResponse(items[4].asParagraphTextItem().createResponse(allData[i].progress));
+    resp.withItemResponse(items[0].asTextItem().createResponse(fileName));
+    resp.withItemResponse(items[1].asTextItem().createResponse(allData[i].studentnumber));
+    resp.withItemResponse(items[2].asTextItem().createResponse(allData[i].coursename));
+    resp.withItemResponse(items[3].asTextItem().createResponse(allData[i].teacherlastfirst));
+    resp.withItemResponse(items[4].asParagraphTextItem().createResponse(allData[i].goal));
+    resp.withItemResponse(items[5].asParagraphTextItem().createResponse(allData[i].progress));
     preFilledURL.push([resp.toPrefilledUrl()]);  
   }
   
   //Add the URLs to the spreadsheet.  
   var lcol = sheet.getLastColumn()+1;
   sheet.getRange(1, lcol).setValue('PreFilledURL');
+  sheet.getRange(1, lcol+1).setValue('Links');
    
   sheet.getRange(2, lcol, allData.length).setValues(preFilledURL);
-  sheet.getRange(2, lcol + 1).setFormula("=arrayformula(HYPERLINK(I2:I,A2:A))"); //NEED a way to offset this!!
+  sheet.getRange(2, lcol + 1).setFormula("=filter(arrayformula(HYPERLINK(I2:I,LEFT(A2:A,LEN(A2:A)-11))),not(ISBLANK(A2:A)))"); //NEED a way to offset this!!
   
   return true;
 }

@@ -32,7 +32,7 @@ function createMidOrFinalDocs(docIDs,destination, fldrTitle, MidOrFinal,sheet, f
     info.done = true;
   }
   catch(err){
-    errorhandler_(err, "Error in creating folder and mid year docs.");
+    console.log(err, "Error in creating folder and mid year docs.");
     }
   return info;
 }
@@ -103,7 +103,7 @@ function copyDocs_(theIDs, destFolderID, MidFinal) {
   done = true;
   } //end of Try
   catch(err){
-    console.error("Making copies of the docs error: %s", err);
+    console.error("Making copies of the docs error: %s, %s", destFolderID, err);
     return done;
   } //of of catch
   
