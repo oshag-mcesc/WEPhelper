@@ -15,6 +15,7 @@
 
 function getServedGiftedFairborn(theSheet, theData, school, extraDataMS) {
   var rslts;
+  school = school.toUpperCase();
   switch(school){
     case "PS":
     case "IS":

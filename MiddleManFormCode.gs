@@ -1,3 +1,5 @@
+//POSSIBLE DELETION not needed anymore
+
 /**
  * Creates a "MiddleMan" form to be used to submit WEP goals 
  *

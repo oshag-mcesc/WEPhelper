@@ -30,7 +30,7 @@ function appendTable(info){
     result.done = true;
     }//end try
  catch(err){
-   consolse.info("Error in appending tables!");
+   console.info("Error in appending tables!");
    console.log(err);
    result.done = false;
    result.info = err;

@@ -1,17 +1,4 @@
 /**
-* Creates a new sheet named 'teacherEmails' and adds the UNIQUE function
-* This gets a list that can be used as a lookup 
-*
-* @return nothing
-*/
-function CreateTeacherEmailSheet() {
-  var spreadsheet = SpreadsheetApp.getActive();
-  spreadsheet.insertSheet('teacherEmails',spreadsheet.getNumSheets());
-  spreadsheet.getCurrentCell().setFormulaR1C1('=UNIQUE(allData!R[0]C[2]:C[3])');
-  spreadsheet.getCurrentCell().offset(1, 0).activate();
-};
-
-/**
  * Generates a list of docIds and titles to check
  * 
  * @param {string} FolderID the id of the folder with the docs
