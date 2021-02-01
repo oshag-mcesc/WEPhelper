@@ -4,7 +4,7 @@
  * and the student will be "served" in that course.  If it is not then "NONE" is pushed to the list.
  *
  * Superior Cog and Creative Thinking are GIVENS (if a student has either or both and the class is a gifted class
- * then they are served!!)  EXCEPT for Huber Heights.  They do NO Supierior Cog AND Creative Thinking is done in Reading.
+ * then they are served!! EXCEPTIONS are for VPA!!)  EXCEPT for Huber Heights.  They do NO Supierior Cog AND Creative Thinking is done in Reading.
  * 
  * @param {obj} theSheet the sheet with all the data
  * @param {array} theData the array of data values
