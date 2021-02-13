@@ -43,7 +43,7 @@ function createMidOrFinalDocs(docIDs,destination, fldrTitle, MidOrFinal,sheet, f
 * @param {array} theIds the array of file IDs
 * @return {booliean} done true if done, false otherwise
 */
-//THIS needs to be in WEPhelpers... maybe need a better name?
+
 function deleteText(theIDs){
   
   var done = false; //flag to tell if it is done
@@ -90,7 +90,7 @@ function CreateFolder_(folderID, fldrName){
 * @param {string} MidFinal this will be added to file name (ie "Mid Year", "Final")
 * @return {booliean} done true if done, false otherwise
 */
-//THIS needs to be in WEPhelpers... maybe need a better name?
+
 
 function copyDocs_(theIDs, destFolderID, MidFinal) {
   var done = false;

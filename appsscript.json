@@ -1,12 +1,5 @@
 {
   "timeZone": "America/New_York",
-  "dependencies": {
-    "libraries": [{
-      "userSymbol": "ObjApp",
-      "libraryId": "1BTKnGC-toLkpBBCWeuXUupoyi6JlgvM3UncFTJUyObMX2U-SOf8v9QTI",
-      "version": "5"
-    }]
-  },
   "exceptionLogging": "STACKDRIVER",
   "executionApi": {
     "access": "MYSELF"
