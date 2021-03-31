@@ -12,6 +12,8 @@ function addClasses(theData, rowNum) {
   //create the style for the header row
   var headerStyle = {};
   headerStyle[DocumentApp.Attribute.BOLD] = true;
+  var rowStyle = {};
+  rowStyle[DocumentApp.Attribute.BOLD] = false;
   //var for the results and timer
   var rslts = {};
   var start = new Date();
@@ -21,7 +23,7 @@ function addClasses(theData, rowNum) {
     var tbl = getTheTable_(theData[i][0]);
     //do loop will run until i == length OR (see coments above the 'while' statement
     do{
-      var tr = tbl.appendTableRow();
+      var tr = tbl.appendTableRow().setAttributes(rowStyle);
       for(var j = 1;j<4;j++){
         tr.appendTableCell(theData[i][j]);
       }

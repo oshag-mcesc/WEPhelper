@@ -66,8 +66,8 @@ function createDocs(sheet, theData, fileID, folderID, startRow, wepType) {
     body.replaceText('<<StudentNumber>>',studentnumber);
     body.replaceText('<<GiftedArea>>',giftedArea);
     body.replaceText('<<SchoolCode>>',schoolCode);
-    body.replaceText('<<ReturnTo>>',returnTo);
-    body.replaceText('<<WEP type>>',theType);
+    //body.replaceText('<<ReturnTo>>',returnTo);
+    //body.replaceText('<<WEP type>>',theType);
     
     //load the docID array
     docIDs.push([newFile.getId()]);
