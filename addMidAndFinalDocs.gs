@@ -73,6 +73,46 @@ function deleteText(theIDs){
   return done;
 }
 
+/*
+* Given a list of IDs this will delete everything from the last HR on
+* 
+* @param {array} theIds the array of file IDs
+* @return {booliean} done true if done, false otherwise
+*/
+//THIS needs to be in WEPhelpers... maybe need a better name?
+function deleteTextHR(theIDs){
+  
+  var done = false; //flag to tell if it is done
+  
+  try {
+    theIDs.forEach(function (docID) {
+      var doc = DocumentApp.openById(docID);
+      var body = doc.getBody();
+
+      var paras = body.getParagraphs();
+      var hzRule = [];
+      var num = paras.length;
+      for (var i = 0; i < num; i++) {
+        if (paras[i].getNumChildren() > 0) {
+          var fChild = paras[i].getChild(0);
+          if (fChild.getType() === DocumentApp.ElementType.HORIZONTAL_RULE) {
+            hzRule.push(i);
+          }
+        }
+      }
+      
+      var stopIndex = doc.getBody().getChildIndex(paras[hzRule[hzRule.length-1]]);
+      theDeleter(doc,stopIndex)
+      //console.log(stopIndex);
+    });
+    done = true;
+  } //end of Try
+  catch (err) {
+    console.error("Removing text after HR error %s", err);
+  } //end of catch
+
+  return done;
+}
 
 //****************************************HELPER FUNCTIONS
 //Creates a new folder
