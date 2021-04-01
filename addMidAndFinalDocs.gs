@@ -102,7 +102,7 @@ function deleteTextHR(theIDs){
       }
       
       var stopIndex = doc.getBody().getChildIndex(paras[hzRule[hzRule.length-1]]);
-      theDeleter(doc,stopIndex)
+      theDeleter_(doc,stopIndex)
       //console.log(stopIndex);
     });
     done = true;
