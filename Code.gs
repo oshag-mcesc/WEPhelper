@@ -7,12 +7,11 @@
  * @param {string} fileID the ID of the template file
  * @param {string} folderID the ID of the destination folder
  * @param {integer} startRow the row to start processing
- * @param {integer} wepType the type of wep 1 = Mid Year, 2 = Final Eval missing will be Initial
  * @return {object} the code will return {rowNum, done} where ronwNum is the next row to process and done if done
  */
 
 
-function createDocs(sheet, theData, fileID, folderID, startRow, wepType) {
+function createDocs(sheet, theData, fileID, folderID, startRow) {
   //Get the data and change to an object
   var data =ObjApp.rangeToObjects(theData);
   
@@ -23,19 +22,6 @@ function createDocs(sheet, theData, fileID, folderID, startRow, wepType) {
   //set the start row
   var rowNum = startRow;
   
-  //set the WEP type
-  var theType
-  if(wepType){
-    switch(wepType){
-      case 1:
-        theType = "Mid-Year Progress";
-        break;
-      case 2:
-        theType = "Final Evaluation";
-        break;
-    }    
-  }
- 
   //more vars needed!!
   var docIDs = []; //array to hold all the document IDs
   var firstRow = startRow + 2; //ObjApp removes header from range so add 2
@@ -66,8 +52,6 @@ function createDocs(sheet, theData, fileID, folderID, startRow, wepType) {
     body.replaceText('<<StudentNumber>>',studentnumber);
     body.replaceText('<<GiftedArea>>',giftedArea);
     body.replaceText('<<SchoolCode>>',schoolCode);
-    //body.replaceText('<<ReturnTo>>',returnTo);
-    //body.replaceText('<<WEP type>>',theType);
     
     //load the docID array
     docIDs.push([newFile.getId()]);
