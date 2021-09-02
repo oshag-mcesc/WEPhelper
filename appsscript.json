@@ -3,5 +3,6 @@
   "exceptionLogging": "STACKDRIVER",
   "executionApi": {
     "access": "MYSELF"
-  }
+  },
+  "runtimeVersion": "V8"
 }

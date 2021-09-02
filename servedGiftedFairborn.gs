@@ -30,8 +30,8 @@ function getServedGiftedFairborn(theSheet, theData, school, extraDataMS) {
   }
   if(rslts.length>1){ 
      //HARD CODED range!!!!!!!  ****************
-    theSheet.getRange("L1").setValue("Served");
-    theSheet.getRange(2,12,theSheet.getLastRow(),1).setValues(rslts);
+    theSheet.getRange("M1").setValue("Served");
+    theSheet.getRange(2,13,theSheet.getLastRow(),1).setValues(rslts);
     return true;
     }
   else{
