@@ -11,23 +11,37 @@ const nssTheEmailer =(()=>{
    * @param {string} emailInfo.closing - The closing of the message.
    */
   const sendTheMail_ = (emailInfo)=>{
-    //get all the links into HTML rows   
-    let theRows = emailInfo.data.map(row=>{
-      return `<tr><td><a href=\"${row[1]}\">${row[2]}</a></td></tr>`
-    }).join('')
+    try{
+      //get all the links into HTML rows   
+      let theRows = emailInfo.data.map(row=>{
+        return `<tr><td><a href=\"${row[1]}\">${row[2]}</a></td></tr>`
+      }).join('')
+      
+      let temp = HtmlService.createTemplateFromFile("emailTemplate")
+      temp.theRows = theRows
+      temp.greeting = emailInfo.greeting
+      temp.closing = emailInfo.closing
+      let html = temp.evaluate().getContent().toString()
+      //let msg= "<h1>This is big!!</h1><div style='color:purple;font-size:40px;'>This should be red.<div>"
+      GmailApp.sendEmail(
+        emailInfo.recipient,
+        emailInfo.subject,
+        "Body",
+        {htmlBody:html}
+      )
+      // logIt({
+      //   level:'info',
+      //   theMsg:`Email sent to ${emailInfo.recipient}`
+      // })
+    }
+    catch(err){
+      logIt({
+        level:"severe",
+        theMsg:"Error in emailing links",
+        error:err
+      })
+    }
     
-    let temp = HtmlService.createTemplateFromFile("emailTemplate")
-    temp.theRows = theRows
-    temp.greeting = emailInfo.greeting
-    temp.closing = emailInfo.closing
-    let html = temp.evaluate().getContent().toString()
-    //let msg= "<h1>This is big!!</h1><div style='color:purple;font-size:40px;'>This should be red.<div>"
-    GmailApp.sendEmail(
-      emailInfo.recipient,
-      emailInfo.subject,
-      "Body",
-      {htmlBody:html}
-    )
   }
   return{
     sendTheMail:sendTheMail_
