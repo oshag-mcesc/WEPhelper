@@ -1,7 +1,14 @@
 {
   "timeZone": "America/New_York",
   "exceptionLogging": "STACKDRIVER",
-  "executionApi": {
-    "access": "MYSELF"
+  "runtimeVersion": "V8",
+  "dependencies": {
+    "libraries": [
+      {
+        "userSymbol": "MyBBLog",
+        "version": "1",
+        "libraryId": "1RHMscVSeGBkUHNw3_Qk929lDRC21Uw5_5e8G5j9a_CXKiwzoOLL-uPEM"
+      }
+    ]
   }
 }

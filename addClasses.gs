@@ -57,7 +57,7 @@ function getTheTable_(docId){
   var numberOfTables = tables.length;
   for(var i=0; i<=numberOfTables;i++){
     var cell = tables[i].getCell(0, 0).getText();
-    if(cell == "Service Area"){
+    if(cell == "Service Area" || cell == " Service Area"){
       //Get out!  i is the index of the table we want
       break;
     }

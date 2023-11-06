@@ -31,7 +31,7 @@ function preFilledGoalsURLs(sheet, theData, formID){
   sheet.getRange(1, lcol).setValue('PreFilledURL');
   sheet.getRange(2, lcol, allData.length).setValues(preFilledURL);
   
-  sheet.getRange(1, lcol + 1).setValue('Hyperlink');
+  sheet.getRange(1, lcol + 1).setValue('Links');
   sheet.getRange(2, lcol + 1).setFormula("=arrayformula(HYPERLINK(G2:G,A2:A))"); //NEED a way to offset this!!
   
   return true;

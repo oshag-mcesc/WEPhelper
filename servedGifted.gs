@@ -15,7 +15,7 @@
 function getServedGifted(theSheet, theData, huberElem) {
   //huberElem is needed because they do no Superioar Cog...
   if(huberElem ==='undefined'|| huberElem === null){huberElem = false;}
-  
+  console.log("Got to WEPhelper")
   var bigList = [];
   var theList = '';
   
@@ -59,8 +59,8 @@ function getServedGifted(theSheet, theData, huberElem) {
   }
   
    //HARD CODED range!!!!!!!  ****************
-  theSheet.getRange("L1").setValue("Served");
-  theSheet.getRange(2,12,theSheet.getLastRow(),1).setValues(bigList);
+  theSheet.getRange("M1").setValue("Served");
+  theSheet.getRange(2,13,theSheet.getLastRow(),1).setValues(bigList);
   
   return true;
 }
