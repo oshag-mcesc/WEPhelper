@@ -18,3 +18,6 @@ let logIt = (info)=>{
   }
   
 }
+
+//so scripts from sheet can log to error log sheet
+var logError = logIt
