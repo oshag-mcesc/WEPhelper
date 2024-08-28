@@ -4,6 +4,9 @@ function onOpen() {
     .addItem("Show Alert","WEPhelper.showAlert")
     .addItem("Push Mid Years","WEPhelper.pushMidUpdate")
     .addItem("Push Final Eval","WEPhelper.pushFinalUpdate")
+    .addSeparator()
+    .addSubMenu(ui.createMenu("Admin")
+      .addItem("Run Test","WEPhelper.testIt_g"))
     .addToUi()
 }
 

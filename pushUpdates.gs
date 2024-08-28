@@ -50,7 +50,7 @@ const configPushUpdates = (updateObj) => {
     errorsTab.getRange(errorsTab.getLastRow()+1,1,rslt.errors.length,rslt.errors[0].length).setValues(rslt.errors)
     SpreadsheetApp.getActiveSpreadsheet().toast("There has been an error.  Check the errors tab","Uh - oh!!",-1)
   }else{
-    SpreadsheetApp.getActiveSpreadsheet().toast(`Done with updateing ${rowTitle}`,"Done!", 5)
+    SpreadsheetApp.getActiveSpreadsheet().toast(`Done with updating ${rowTitle}`,"Done!", 5)
   }
   // console.log(rslt.anyErrors);
   // console.log(rslt.errors);
@@ -103,6 +103,7 @@ const pushTheUpdates = (updateInfo) => {
     catch (err) {
       results.errors.push([nsUtils.getFormattedDateTime(),idx+1, docId, err.message])
       results.anyErrors = true
+      logIt({"level":"severe","theMsg":"Error pushing updates","error":err})
     }
 
   })
