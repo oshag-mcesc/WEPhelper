@@ -67,7 +67,7 @@ function preFilledURLsFINAL(sheet, theData, formID, docAddName){
   sheet.getRange(1, lcol+1).setValue('Links');
    
   sheet.getRange(2, lcol, allData.length).setValues(preFilledURL);
-  sheet.getRange(2, lcol + 1).setFormula("=filter(arrayformula(HYPERLINK(I2:I,LEFT(A2:A,LEN(A2:A)-11))),not(ISBLANK(A2:A)))"); //NEED a way to offset this!!
+  sheet.getRange(2, lcol + 1).setFormula(`=filter(arrayformula(HYPERLINK(I2:I,A2:A&" - "&C2:C)),A2:A<>"")`); //NEED a way to offset this!!
   
   return true;
 }

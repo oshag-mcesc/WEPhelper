@@ -37,7 +37,7 @@ const configPushUpdates = (updateObj) => {
   
   let infoObject = {
     theData:updateData,
-    rowTitle:rowTitle,
+    rowTitle:updateData[0][3],  //Get the title for the row from the sheet
     theTab:dataTab,
     theStatusCol:statusCol
   }
@@ -94,7 +94,7 @@ const pushTheUpdates = (updateInfo) => {
         let tbl = theDoc.getBody().getTables()[theIndex]
         let tr = tbl.appendTableRow()
         tr.appendTableCell(rowTitle).setBackgroundColor("#E0E0E0")
-        tr.appendTableCell(row[4])
+        tr.appendTableCell(row[3])
         
       })
 

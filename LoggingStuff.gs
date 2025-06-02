@@ -21,3 +21,13 @@ let logIt = (info)=>{
 
 //so scripts from sheet can log to error log sheet
 var logError = logIt
+
+const testLog=()=>{
+      logIt({
+        level:"severe",
+        theMsg:"Error in emailing links",
+        //error:"Bad news!"
+      })
+}
+
+var testLog1 = testLog

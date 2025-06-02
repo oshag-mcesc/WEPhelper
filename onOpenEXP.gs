@@ -6,7 +6,9 @@ function onOpen() {
     .addItem("Push Final Eval","WEPhelper.pushFinalUpdate")
     .addSeparator()
     .addSubMenu(ui.createMenu("Admin")
-      .addItem("Run Test","WEPhelper.testIt_g"))
+      .addItem("Reset Sheets","WEPhelper.reset1.resetEm")
+      .addItem("Run Test","WEPhelper.testIt_g")
+      .addItem("Test Log","WEPhelper.testLog1"))
     .addToUi()
 }
 
