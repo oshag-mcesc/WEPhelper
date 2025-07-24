@@ -32,12 +32,21 @@ const nsUtils = (() => {
     let tables = doc.getBody().getTables()
 
     //map all the table info into a new array
-    let tableInfo = tables.map((table, index) => {
+    const tableInfo = tables.map((table, index) => {
+      // Check if the table has more than one row
       if (table.getNumRows() > 1) {
-        return [table.getCell(0, 1).getText(), table.getCell(1, 1).getText(), index]
-      } else {
-        return "remove" //this makes it easy to remove tables from the final array by filtering
+        // If it has more than one row, then check if the first row has at least 2 cells (columns)
+        // We need to ensure the first row exists before trying to get its cells.
+        // Although if getNumRows() > 1, getRow(0) should be safe.
+        const firstRow = table.getRow(0);
+        if (firstRow && firstRow.getNumCells() >= 2) {
+          // If it meets both criteria (more than 1 row AND at least 2 columns),
+          // return an array with data from specific cells and the table's original index.
+          return [table.getCell(0, 1).getText(), table.getCell(1, 1).getText(), index];
+        }
       }
+      // If it doesn't meet the criteria, return "remove" to easily filter it out later.
+      return "remove";
     })
 
     //Filter the info to get rid of 'remove'
@@ -84,3 +93,10 @@ const nsUtils = (() => {
     getFormattedDateTime : getFormattedDateTime_
   }
 })()
+
+const check = ()=>{
+  let id = "1TP9otI9qXdBarPLs0dnaSdfWBPXOZKXXcq3h49V1t74"
+  let doc = DocumentApp.openById(id)
+  let rslt = nsUtils.getTableIndexes(doc)
+  console.log(rslt)
+}

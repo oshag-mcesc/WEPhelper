@@ -29,10 +29,10 @@ const nssTheEmailer =(()=>{
         "Body",
         {htmlBody:html}
       )
-      // logIt({
-      //   level:'info',
-      //   theMsg:`Email sent to ${emailInfo.recipient}`
-      // })
+      logIt({
+        level:'info',
+        theMsg:`Email sent to ${emailInfo.recipient}`
+      })
     }
     catch(err){
       logIt({
