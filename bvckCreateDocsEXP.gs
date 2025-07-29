@@ -1,4 +1,4 @@
-const createWEPdocs = (() => {
+const createWEPdocs1 = (() => {
   const createInitialWEPs_ = () => {
     try {
       SpreadsheetApp.getActiveSpreadsheet().toast("Creating Initial WEPs!", "Started!", -1)
@@ -35,7 +35,8 @@ const createWEPdocs = (() => {
   }
 })()
 
-
+//needed global let to be called from a library!
+var createWEPdocs = createWEPdocs1
 
 /**
  * Change to arrow function with a namespace
