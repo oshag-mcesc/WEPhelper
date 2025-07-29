@@ -1,20 +1,40 @@
-const tester2 = () => {
-  const ss = SpreadsheetApp.openByUrl("https://docs.google.com/spreadsheets/d/1eh_O6C358dwzpIgbD9zmXd4rVID6JM7fAekU7ANDOBY/edit#gid=292274356")
-  const sheet = ss.getSheetByName("forDocs")
-  let studInfo = sheet.getDataRange().getValues()
-  let saveFolderId = "1ZkfNQtGVxs2mZ40Eb5JBpL2pezfkjc9X"
-  let templateId = "1bKhtliVNUglYLjJLX5zPWBqq5Rw9TjXqtMvPjrc2atM"
-  let rowStart = 0
-  let infoObj = {
-    sheet: sheet,
-    theData: studInfo,
-    fileID: templateId,
-    folderID: saveFolderId,
-    startRow: rowStart
+const createWEPdocs = (() => {
+  const createInitialWEPs_ = () => {
+    try {
+      SpreadsheetApp.getActiveSpreadsheet().toast("Creating Initial WEPs!", "Started!", -1)
+      //Get the rowNum property, set it to 0 if it doesn't exist yet
+      const ss = SpreadsheetApp.getActiveSpreadsheet().getSheetByName('forDocs')
+      let props = PropertiesService.getScriptProperties()
+      let infoObj = {
+        sheet: ss,
+        theData: ss.getDataRange().getValues(),
+        fileID: props.getProperty("WEPtemplateID"),
+        folderID: props.getProperty("MainWEPfolderID"),
+        startRow: parseInt((props.getProperty("rowNum")) ? props.getProperty("rowNum") : 0)
+      }
+      let theRslts = createWEPs.create(infoObj)
+      saveSettings(theRslts);
+
+      switch (theRslts.done) {
+        case "true":
+          SpreadsheetApp.getActiveSpreadsheet().toast("Got done in time!", "All done!", -1)
+          break;
+        case "false":
+          SpreadsheetApp.getActiveSpreadsheet().toast("Exceeded time limit! Please run createDocs again.", "NOT done yet!", -1)
+          break;
+      }
+    }
+    catch (err) {
+      errorhandler_(err, "Creating docs");
+    }
   }
-  let rslt = createWEPs.create(infoObj)
-  console.log(rslt)
-}
+
+  return {
+    createInitialWEPs: createInitialWEPs_
+  }
+})()
+
+
 
 /**
  * Change to arrow function with a namespace
@@ -95,93 +115,3 @@ const createWEPs1 = (() => {
 //needed global let to be called from a library!
 var createWEPs = createWEPs1
 
-
-
-
-
-
-
-
-
-
-/**
- * Creates a document based on a template for each row of data.
- * (NOTE: There is a timing function to catch if script runs to long)
- *
- * @param {obj} sheet the sheet with all the data
- * @param {array} theData the array of data values
- * @param {string} fileID the ID of the template file
- * @param {string} folderID the ID of the destination folder
- * @param {integer} startRow the row to start processing
- * @return {object} the code will return {rowNum, done} where ronwNum is the next row to process and done if done
- */
-
-
-function createDocs2(sheet, theData, fileID, folderID, startRow) {
-  //Get the data and change to an object
-  let data = ObjApp.rangeToObjects(theData);
-
-  //get the template file and destination folder
-  let file = DriveApp.getFileById(fileID);
-  let folder = DriveApp.getFolderById(folderID);
-
-  //set the start row
-  let rowNum = startRow;
-
-  //more lets needed!!
-  let docIDs = []; //array to hold all the document IDs
-  let firstRow = startRow + 2; //ObjApp removes header from range so add 2
-  let start = new Date();  //set the start time for the script
-  let rslts = {} //object to return info to calling script
-
-  SpreadsheetApp.getActiveSpreadsheet().toast("Running....", "Creating", 2);
-
-  let dataLength = data.length;
-  for (rowNum; rowNum < dataLength; rowNum++) {
-    //the info needed
-    let firstName = data[rowNum].studfirst;
-    let studName = data[rowNum].studlastfirst;
-    let grade = data[rowNum].grade;
-    let giftedArea = data[rowNum].giftedarea;
-    let schoolCode = data[rowNum].schoolcode;
-    let returnTo = data[rowNum].returnto;
-    let studentnumber = data[rowNum].studentnumber;
-    let fileName = studName + " " + studentnumber;
-
-    //make copy of the template, get the body of the new doc
-    //replace the text as needed
-    let newFile = file.makeCopy(fileName, folder);
-    let body = DocumentApp.openById(newFile.getId());
-    body.replaceText('<<StudLastFirst>>', studName);
-    body.replaceText('<<Grade>>', grade);
-    body.replaceText('<<StudFirst>>', firstName);
-    body.replaceText('<<StudentNumber>>', studentnumber);
-    body.replaceText('<<GiftedArea>>', giftedArea);
-    body.replaceText('<<SchoolCode>>', schoolCode);
-
-    //load the docID array
-    docIDs.push([newFile.getId()]);
-
-    //check execution time ***NEED TO SET THIS TO THE CALLING SCRIPT!!!
-    if (isTimeUp_(start)) {
-      rslts = { done: "false", rowNum: rowNum + 1 };
-      //Logger.log("Limit met!!!");
-      break; //get out if time is up!!
-    }
-  }
-  let lcol = sheet.getLastColumn();
-  if (!(sheet.getRange(1, lcol).getValue() == 'DocID')) {
-    sheet.getRange(1, lcol + 1).setValue('DocID');
-    lcol += 1;
-  }
-  //fill in the IDs
-  sheet.getRange(firstRow, lcol, docIDs.length).setValues(docIDs);
-
-  //check if we are done
-  if (rowNum >= dataLength) {
-    rslts = { done: "true", rowNum: "0" };
-  }
-
-  //return all info
-  return rslts;
-}
