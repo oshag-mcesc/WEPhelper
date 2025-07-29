@@ -13,7 +13,8 @@ const createWEPdocs = (() => {
         startRow: parseInt((props.getProperty("rowNum")) ? props.getProperty("rowNum") : 0)
       }
       let theRslts = createWEPs.create(infoObj)
-      saveSettings(theRslts);
+      //saveSettings(theRslts);
+      console.log(theRslts)
 
       switch (theRslts.done) {
         case "true":
