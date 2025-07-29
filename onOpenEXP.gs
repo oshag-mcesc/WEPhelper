@@ -1,6 +1,7 @@
 function onOpen() {
   let ui = SpreadsheetApp.getUi()
   ui.createMenu('EXPERIMENTAL')
+    .addItem("Create Initial WEPs","WEPhelper.createWEPdocs.createInitialWEPs")
     .addItem("Show Alert","WEPhelper.showAlert")
     .addItem("Push Mid Years","WEPhelper.pushMidUpdate")
     .addItem("Push Final Eval","WEPhelper.pushFinalUpdate")
