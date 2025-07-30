@@ -2,16 +2,17 @@ const createWEPdocs1 = (() => {
   const createInitialWEPs_ = () => {
     try {
       SpreadsheetApp.getActiveSpreadsheet().toast("Creating Initial WEPs!", "Started!", -1)
-      //Get the rowNum property, set it to 0 if it doesn't exist yet
+      
       const ss = SpreadsheetApp.getActiveSpreadsheet().getSheetByName('forDocs')
-      let props = PropertiesService.getScriptProperties()
+      let settings = getSettingsInstance('config')
       let infoObj = {
         sheet: ss,
         theData: ss.getDataRange().getValues(),
-        fileID: props.getProperty("WEPtemplateID"),
-        folderID: props.getProperty("MainWEPfolderID"),
-        startRow: parseInt((props.getProperty("rowNum")) ? props.getProperty("rowNum") : 0)
-      }
+        fileID: settings.getSetting('WEPtemplateID'),
+        folderID: settings.getSetting('MainWEPfolderID'),
+        startRow: 0
+      };
+      
       let theRslts = createWEPs.create(infoObj)
       //saveSettings(theRslts);
       console.log(theRslts)
@@ -26,7 +27,8 @@ const createWEPdocs1 = (() => {
       }
     }
     catch (err) {
-      errorhandler_(err, "Creating docs");
+      //errorhandler_(err, "Creating docs");
+      console.log(err);
     }
   }
 
@@ -51,7 +53,7 @@ const createWEPs1 = (() => {
     const { sheet, theData, fileID, folderID, startRow } = theInfo
     //Get the data and change to an object
     let data = ObjApp.rangeToObjects(theData);
-
+    logIt({ level: "info", theMsg: `fileID: ${fileID} and folderID: ${folderID}` })
     //get the template file and destination folder
     let file = DriveApp.getFileById(fileID);
     let folder = DriveApp.getFolderById(folderID);
@@ -90,7 +92,6 @@ const createWEPs1 = (() => {
       }
       return true
     })
-
 
     let lcol = sheet.getLastColumn();
     if (!(sheet.getRange(1, lcol).getValue() == 'DocID')) {
