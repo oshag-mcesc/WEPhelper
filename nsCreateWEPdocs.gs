@@ -2,17 +2,18 @@ const createWEPdocs1 = (() => {
   const createInitialWEPs_ = () => {
     try {
       SpreadsheetApp.getActiveSpreadsheet().toast("Creating Initial WEPs!", "Started!", -1)
-      
+
       const ss = SpreadsheetApp.getActiveSpreadsheet().getSheetByName('forDocs')
-      let settings = getSettingsInstance('config')
+      const settings = getSettingsInstance(CONFIG.SHEET_NAME);
+
       let infoObj = {
         sheet: ss,
         theData: ss.getDataRange().getValues(),
-        fileID: settings.getSetting('WEPtemplateID'),
-        folderID: settings.getSetting('MainWEPfolderID'),
-        startRow: 0
+        fileID: settings.getSetting(CONFIG.KEYS.WEP_TEMPLATE_ID),
+        folderID: settings.getSetting(CONFIG.KEYS.MAIN_WEP_FOLDER_ID),
+        startRow: settings.getSetting(CONFIG.KEYS.ROW_NUM) || 0
       };
-      
+
       let theRslts = createWEPs.create(infoObj)
       //saveSettings(theRslts);
       console.log(theRslts)
@@ -20,9 +21,11 @@ const createWEPdocs1 = (() => {
       switch (theRslts.done) {
         case "true":
           SpreadsheetApp.getActiveSpreadsheet().toast("Got done in time!", "All done!", -1)
+          settings.setSetting(CONFIG.KEYS.ROW_NUM,0)
           break;
         case "false":
           SpreadsheetApp.getActiveSpreadsheet().toast("Exceeded time limit! Please run createDocs again.", "NOT done yet!", -1)
+          settings.setSetting(CONFIG.KEYS.ROW_NUM,theRslts.rowNum)
           break;
       }
     }
@@ -57,9 +60,6 @@ const createWEPs1 = (() => {
     //get the template file and destination folder
     let file = DriveApp.getFileById(fileID);
     let folder = DriveApp.getFolderById(folderID);
-
-    //set the start row
-    let rowNum = startRow;
 
     //more info needed!!
     let docIDs = []; //array to hold all the document IDs
