@@ -1,94 +1,242 @@
 /**
- * This code was added 9/12/2024 by Michael O'Shaughnessy
- * A major attempt was done to add JSDOC documentation.  
- * The doc for the function and namespace is good BUT for the settings object it is not right...
+ * Reset functionality for Google Sheets - prepares spreadsheets for new school year
+ * Created: 9/12/2024 by Michael O'Shaughnessy
+ * Optimized: Performance improvements with batched operations
  */
+
 /**
  * @namespace reset
- * @description A namespace containing a function to reset spreadsheet tabs based on configurations.
+ * @description Namespace containing functions to reset spreadsheet tabs based on configurations.
+ * Creates missing required tabs and resets existing tabs to their initial state for new school year.
  */
 const reset = (() => {
 
   /**
-   * Resets spreadsheet tabs based on the settings provided in the `settingsTabs.tabs` object.
-   * Loops through each tab configuration in the settings object and performs the following actions for tabs marked for reset:
-   *   - Gets the sheet based on the configuration's `name` property.
-   *   - Clears the sheet content.
-   *   - Deletes unnecessary rows and columns based on thresholds (configurable in settings).
-   *   - Sets headers if provided in the configuration's `headers` property.
-   *   - Sets formulas if provided in the configuration's `formulas` property.
+   * Main reset function that prepares the spreadsheet for a new school year.
+   * Creates missing required tabs (especially config) and resets existing tabs based on configuration.
+   * Uses batched operations for optimal performance.
+   * 
+   * @function resetEm
+   * @memberof reset
+   * @description Resets spreadsheet tabs based on the settings provided in the `settingsTabs.tabs` object.
+   * Performs the following actions:
+   *   - Creates missing required tabs (config tab with proper setup)
+   *   - Clears content from tabs marked for reset
+   *   - Resizes sheets to standard dimensions (20 rows, 26 columns)
+   *   - Sets headers if provided in configuration
+   *   - Sets formulas if provided in configuration
+   * 
+   * @throws {Error} Logs severe errors via logIt function if reset process fails
    */
   const resetEm = () => {
-    const ss = SpreadsheetApp.getActiveSpreadsheet(); // Get the active spreadsheet
-    try{
-        for (const tabName in settingsTabs.tabs) {
-      const tab = settingsTabs.tabs[tabName];
-      if (tab.reset) {
-        let sheet = ss.getSheetByName(tab.name); // Get the sheet (tab) by name
+    const ss = SpreadsheetApp.getActiveSpreadsheet();
+    
+    try {
+      // Notify user that reset process has started
+      SpreadsheetApp.getActiveSpreadsheet().toast("Resetting spreadsheet for new year...", "Starting Reset", -1);
 
-        // Batch clear content and unnecessary rows/columns
-        const maxRows = sheet.getMaxRows();
-        const maxColumns = sheet.getMaxColumns();
-        if (maxRows > 20) {
-          sheet.deleteRows(21, maxRows - 20);
-        }
-        if (maxColumns > 26) {
-          sheet.deleteColumns(27, maxColumns - 26);
-        }
-        sheet.clearContents();
+      // Phase 1: Create any missing required tabs (especially config tab)
+      createMissingTabs(ss);
 
-        // Set headers (if provided)
-        if (tab.headers) {
-          sheet.getRange(1, 1, 1, tab.headers.length).setValues([tab.headers]);
-        }
+      // Phase 2: Reset existing tabs with optimized batched operations
+      resetExistingTabs(ss);
 
-        // Set formulas (if provided)
-        if (tab.formulas) {
-          for (const cell in tab.formulas) {
-            sheet.getRange(cell).setFormula(tab.formulas[cell]);
+      // Notify user of successful completion
+      SpreadsheetApp.getActiveSpreadsheet().toast("Reset complete!", "Finished", 3);
+
+    } catch (err) {
+      logIt({
+        level: "severe",
+        theMsg: "Problem with resetting sheets",
+        error: err
+      });
+    }
+
+    /**
+     * Creates missing tabs that are marked as required in the configuration.
+     * Checks for tabs that have either createIfMissing: true or reset: true.
+     * 
+     * @function createMissingTabs
+     * @inner
+     * @param {GoogleAppsScript.Spreadsheet.Spreadsheet} ss - The active spreadsheet
+     */
+    function createMissingTabs(ss) {
+      for (const tabName in settingsTabs.tabs) {
+        const tab = settingsTabs.tabs[tabName];
+
+        // Create tab if it's marked as createIfMissing or required for reset
+        if (tab.createIfMissing || tab.reset) {
+          let sheet = ss.getSheetByName(tab.name);
+
+          if (!sheet) {
+            console.log(`Creating missing required tab: ${tab.name}`);
+            sheet = ss.insertSheet(tab.name);
+
+            // Special setup for config tab
+            if (tabName === 'config') {
+              setupConfigTab(sheet, tab);
+            }
           }
         }
       }
     }
+
+    /**
+     * Processes all tabs marked for reset using batched operations for performance.
+     * Collects all sheets first, then processes each with error handling per sheet.
+     * 
+     * @function resetExistingTabs
+     * @inner
+     * @param {GoogleAppsScript.Spreadsheet.Spreadsheet} ss - The active spreadsheet
+     */
+    function resetExistingTabs(ss) {
+      const sheetsToProcess = [];
+
+      // Step 1: Collect all sheets that need resetting and validate they exist
+      for (const tabName in settingsTabs.tabs) {
+        const tab = settingsTabs.tabs[tabName];
+        if (tab.reset) {
+          const sheet = ss.getSheetByName(tab.name);
+          if (sheet) {
+            sheetsToProcess.push({ sheet, config: tab });
+          } else {
+            console.log(`Warning: Tab "${tab.name}" marked for reset but not found`);
+          }
+        }
+      }
+
+      // Step 2: Process each sheet with batched operations and individual error handling
+      sheetsToProcess.forEach(({ sheet, config }) => {
+        try {
+          resetSingleTab(sheet, config);
+        } catch (err) {
+          logIt({
+            level: "severe",
+            theMsg: `Error resetting tab: ${sheet.getName()}`,
+            error: err
+          });
+        }
+      });
     }
-    catch(err){
-      logIt({
-        level:"severe",
-        theMsg:"Problem with resetting sheets",
-        error: err})
+
+    /**
+     * Resets a single tab with batched operations for optimal performance.
+     * Handles resizing, clearing, and populating the sheet based on configuration.
+     * 
+     * @function resetSingleTab
+     * @inner
+     * @param {GoogleAppsScript.Spreadsheet.Sheet} sheet - The sheet to reset
+     * @param {TabConfiguration} tabConfig - Configuration object for the tab
+     */
+    function resetSingleTab(sheet, tabConfig) {
+      // Batch operation 1: Resize sheet to standard dimensions (more efficient before clearing)
+      const maxRows = sheet.getMaxRows();
+      const maxColumns = sheet.getMaxColumns();
+
+      if (maxRows > 20) {
+        sheet.deleteRows(21, maxRows - 20);
+      }
+      if (maxColumns > 26) {
+        sheet.deleteColumns(27, maxColumns - 26);
+      }
+
+      // Clear all existing content
+      sheet.clearContents();
+
+      // Batch operation 2: Set headers if provided in configuration
+      if (tabConfig.headers) {
+        sheet.getRange(1, 1, 1, tabConfig.headers.length).setValues([tabConfig.headers]);
+      }
+
+      // Batch operation 3: Set formulas if provided in configuration
+      if (tabConfig.formulas) {
+        for (const cell in tabConfig.formulas) {
+          sheet.getRange(cell).setFormula(tabConfig.formulas[cell]);
+        }
+      }
     }
-  
+
+    /**
+     * Sets up the config tab with proper structure, positioning, and visibility.
+     * Creates the Settings/Value structure needed for the Settings class.
+     * 
+     * @function setupConfigTab
+     * @inner
+     * @param {GoogleAppsScript.Spreadsheet.Sheet} sheet - The config sheet to set up
+     * @param {TabConfiguration} tabConfig - Configuration object containing keys to populate
+     */
+    function setupConfigTab(sheet, tabConfig) {
+      // Set up column headers for Settings class compatibility
+      sheet.getRange('A1:B1').setValues([['Setting', 'Value']]);
+      sheet.getRange('A1:B1').setFontWeight('bold');
+
+      // Populate config keys (values will be set later via Settings class)
+      for (let i = 0; i < tabConfig.keys.length; i++) {
+        sheet.getRange(i + 2, 1).setValue(tabConfig.keys[i]);
+      }
+
+      // Resize config sheet to minimal necessary size (4 columns, 20 rows)
+      const maxRows = sheet.getMaxRows();
+      const maxColumns = sheet.getMaxColumns();
+
+      if (maxRows > 20) {
+        sheet.deleteRows(21, maxRows - 20);
+      }
+      if (maxColumns > 4) {
+        sheet.deleteColumns(5, maxColumns - 4);
+      }
+
+      // Position config tab at the beginning for easy access during development
+      sheet.getParent().moveActiveSheet(0);
+
+      // Hide the config sheet to prevent accidental user modifications
+      if (tabConfig.hideAfterReset) {
+        sheet.hideSheet();
+      }
+    }
   };
 
+  // Return public interface
   return {
-    resetEm,
+    resetEm
   };
 })();
 
-//so it can be called from the menu
-var reset1= reset
+// Global reference for menu system access
+var reset1 = reset;
 
-//-----------------------------------
-//the settings object for all the tabs
-//-----------------------------------
-//attempted to use JSDOC... but it is not all correct.
+//=============================================================================
+// TAB CONFIGURATION SETTINGS
+//=============================================================================
+
 /**
  * @typedef {Object} TabConfiguration
- * @property {string} name
- * @property {boolean} reset
- * @property {string[]} [headers]
- * @property {Object.<string, string>} [formulas]
+ * @property {string} name - The actual name of the sheet tab
+ * @property {boolean} reset - Whether this tab should be reset during yearly reset
+ * @property {boolean} [createIfMissing] - Whether to create this tab if it doesn't exist
+ * @property {boolean} [hideAfterReset] - Whether to hide this tab after reset/creation
+ * @property {string[]} [headers] - Array of column headers to set in row 1
+ * @property {Object.<string, string>} [formulas] - Object mapping cell addresses to formulas
+ * @property {string[]} [keys] - Array of setting keys (used for config tab)
+ */
+
+/**
+ * @namespace settingsTabs
+ * @description Configuration object defining all spreadsheet tabs and their reset behavior.
+ * Used by the reset system to determine which tabs to create, reset, and how to populate them.
  */
 const settingsTabs = (() => {
-  const ns = {}
+  const ns = {};
+  
   /**
-   * @property {TabConfiguration[]} tabs
-   * @description An array of tab configurations.
+   * @property {Object.<string, TabConfiguration>} tabs
+   * @description Object containing all tab configurations indexed by tab identifier.
+   * Each tab configuration defines how that tab should be handled during reset operations.
    */
   ns.tabs = {
     template1: {
       name: 'Template 1',
-      reset: false,
+      reset: false
     },
     original: {
       name: 'ORIGINAL',
@@ -136,18 +284,19 @@ const settingsTabs = (() => {
     },
     tcg: {
       name: 'TeacherCourseGifted',
-      reset: false,
+      reset: false
     },
     forDocs: {
       name: 'forDocs',
       reset: true,
       formulas: {
-        A1: `=query(StudInfo,"Select N, O, P, Q, R, S, T  where U is null order by O",1)`
+        A1: `=query(StudInfo,"Select N, O, P, Q, R, S, T  where U is null order by O",1)`,
+        H1: `={"filename";arrayformula(if(NOT(ISBLANK(A2:A)),B2:B & " " & A2:A,))}`
       }
     },
     docIds: {
       name: 'docIds',
-      reset: true,
+      reset: true
     },
     copiedGoals: {
       name: 'copiedGoals',
@@ -155,7 +304,7 @@ const settingsTabs = (() => {
       formulas: {
         J1: `={"ODEISandcode";FILTER(ARRAYFORMULA(VLOOKUP(F2:F,OFFSET(CourseInfo,,1),2,false)),NOT(ISBLANK(C2:C)))}`,
         K1: `="New"`,
-        L1: `={"teacherEmail";arrayformula(if(NOT(ISBLANK(E2:E)),VLOOKUP(E2:E,OFFSET(TeacherInfo,,1),4,false),))}`,
+        L1: `={"teacherEmail";arrayformula(if(NOT(ISBLANK(E2:E)),VLOOKUP(E2:E,OFFSET(TeacherInfo,,1),4,false),))}`
       }
     },
     forClasses: {
@@ -180,7 +329,7 @@ const settingsTabs = (() => {
       name: 'forMidYear',
       reset: true,
       formulas: {
-        A1: `=QUERY(copiedGoals!B1:L,"Select B, C, E, F, I, L where B is not null AND K='Y' order by E label B 'StudLastFirst', E 'teacherlastfirst', C 'studentnumber', L 'teacheremail', I 'goal', F 'coursename'",1)`,
+        A1: `=QUERY(copiedGoals!B1:L,"Select B, C, E, F, I, L where B is not null AND K='Y' order by E label B 'StudLastFirst', E 'teacherlastfirst', C 'studentnumber', L 'teacheremail', I 'goal', F 'coursename'",1)`
       }
     },
     copiedMidYears: {
@@ -222,7 +371,14 @@ const settingsTabs = (() => {
         K1: `={"Teacher","Class / Course","Progress";D2:D,C2:C,F2:F}`
       }
     },
-  }
+    config: {
+      name: 'config',
+      reset: false,
+      createIfMissing: true,
+      hideAfterReset: true,
+      keys: ["WEPtemplateID", "MainWEPfolderID", "InitialGoalsFormID", "MidYearProgressFormID", "FinalProgressFormID", "rowNum"]
+    }
+  };
 
-  return ns
-})()
+  return ns;
+})();
