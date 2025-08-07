@@ -1,6 +1,7 @@
 function onOpen() {
   let ui = SpreadsheetApp.getUi()
   ui.createMenu('EXPERIMENTAL')
+    .addItem("Show Settings", "WEPhelper.nsPropsSettings.helperShowSettingsDialog")
     .addSubMenu(ui.createMenu('Initial WEPs')
       .addItem('Create the Docs', 'WEPhelper.createWEPdocs.createInitialWEPs')
       .addItem('Add Classes Info', 'WEPhelper.showAlert')

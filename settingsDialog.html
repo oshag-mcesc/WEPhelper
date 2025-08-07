@@ -1,0 +1,249 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link rel="stylesheet" href="https://www.w3schools.com/w3css/4/w3.css">
+    <style>
+        /* CSS to fix the feedback section at the bottom of the page */
+        .feedback-container {
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            width: 100%;
+            z-index: 100; /* Ensure it's on top of other elements */
+            padding: 10px;
+            box-sizing: border-box; /* Include padding in the element's total width and height */
+            text-align: center; /* Center the spinner and feedback */
+        }
+        
+        /* The feedback message itself */
+        .feedback-success {
+            background-color: #d4edda;
+            border-color: #c3e6cb;
+            color: #155724;
+            padding: 10px;
+            border: 1px solid transparent;
+            border-radius: 4px;
+            margin: 0; /* Remove default margins */
+        }
+        .feedback-error {
+            background-color: #f8d7da;
+            border-color: #f5c6cb;
+            color: #721c24;
+            padding: 10px;
+            border: 1px solid transparent;
+            border-radius: 4px;
+            margin: 0;
+        }
+        .feedback-hidden {
+            display: none;
+        }
+
+        /* Pure CSS Spinner (now a little bigger) */
+        .spinner {
+            border: 6px solid #f3f3f3; /* Increased border size */
+            border-top: 6px solid #3498db; /* Increased border size */
+            border-radius: 50%;
+            width: 40px; /* Increased size */
+            height: 40px; /* Increased size */
+            animation: spin 1s linear infinite;
+            display: none; /* Hidden by default */
+            margin: 10px auto;
+        }
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+    </style>
+</head>
+<body>
+    <div class="w3-container">
+        <div class="w3-bar w3-indigo">
+            <button class="w3-bar-item w3-button" onclick="showSettings('theIDs')">Set the IDs</button>
+            <button class="w3-bar-item w3-button" onclick="showSettings('email')">Email Settings</button>
+        </div>
+        
+        <div id="theIDs" class="w3-container settings">
+            <h3 class="w3-text-indigo">Document and Form IDs</h3>
+            <p>
+                <label class="w3-text-indigo"><b>WEP Template DocID</b></label>
+                <input class="w3-input w3-border w3-pale-blue" type="text" id="WEPtemplateID" value="<?= WEPtemplateID ?>">
+            </p>
+            <p>
+                <label class="w3-text-indigo"><b>Main WEP documents folder ID</b></label>
+                <input class="w3-input w3-border w3-pale-blue" type="text" id="MainWEPfolderID" value="<?= MainWEPfolderID ?>">
+            </p>
+            <p>
+                <label class="w3-text-indigo"><b>Initial Goals Form ID</b></label>
+                <input class="w3-input w3-border w3-pale-blue" type="text" id="InitialGoalsFormID" value="<?= InitialGoalsFormID ?>">
+            </p>
+            <p>
+                <label class="w3-text-indigo"><b>Mid Year Progress Form ID</b></label>
+                <input class="w3-input w3-border w3-pale-blue" type="text" id="MidYearProgressFormID" value="<?= MidYearProgressFormID ?>">
+            </p>
+            <p>
+                <label class="w3-text-indigo"><b>Final Progress Form ID</b></label>
+                <input class="w3-input w3-border w3-pale-blue" type="text" id="FinalProgressFormID" value="<?= FinalProgressFormID ?>">
+            </p>
+            
+            <div class="w3-center">
+                <button class="w3-btn w3-blue" onclick="saveIdSettings()">Save ID Settings</button>
+                <button class="w3-btn w3-red" onclick="closeDialog()">Close</button>
+            </div>
+            
+            <div class="w3-container w3-margin-top">
+                <i class="w3-text-gray">NOTE: Enter the Google Drive IDs for each document/form/folder.</i>
+            </div>
+        </div>
+        
+        <div id="email" class="w3-container settings" style="display:none">
+            <h3 class="w3-text-indigo">Email Configuration</h3>
+            <p>
+                <label class="w3-text-indigo"><b>Subject</b></label>
+                <input class="w3-input w3-border w3-pale-blue" type="text" id="subject" value="<?= subject ?>">
+            </p>
+            <p>
+                <label class="w3-text-indigo"><b>Greeting</b></label>
+                <textarea id="greeting" class="w3-input w3-border w3-pale-blue" rows="4"><?= greeting ?></textarea>
+            </p>
+            <p>
+                <label class="w3-text-indigo"><b>Closing</b></label>
+                <textarea id="closing" class="w3-input w3-border w3-pale-blue" rows="4"><?= closing ?></textarea>
+            </p>
+            
+            <div class="w3-container">
+                <label class="w3-text-indigo"><b>Set link time period</b></label>
+                <select class="w3-select w3-pale-blue w3-border" id="linkTime">
+                    <option value="" disabled>Select time period...</option>
+                    <option value="initial">Initial</option>
+                    <option value="mid">Mid Year</option>
+                    <option value="final">Final</option>
+                </select>
+            </div>
+            
+            <div class="w3-container w3-padding-16 w3-center">
+                <button class="w3-btn w3-blue" onclick="saveEmailSettings()">Save Email Settings</button>
+                <button class="w3-btn w3-red" onclick="closeDialog()">Close</button>
+            </div>
+        </div>
+    </div>
+    
+    <div class="feedback-container">
+        <div id="spinner" class="spinner"></div>
+        <div id="feedback" class="feedback-hidden"></div>
+    </div>
+
+    <script>
+        // Set the selected value for linkTime dropdown
+        document.addEventListener('DOMContentLoaded', function() {
+            var select = document.getElementById("linkTime");
+            select.value = "<?= linktime ?>";
+        });
+
+        /**
+         * Show/hide spinner
+         */
+        function showSpinner() {
+            document.getElementById("spinner").style.display = "block";
+        }
+        function hideSpinner() {
+            document.getElementById("spinner").style.display = "none";
+        }
+
+        /**
+         * Show feedback message to user
+         */
+        function showFeedback(message, isSuccess = true) {
+            var feedbackDiv = document.getElementById("feedback");
+            feedbackDiv.className = isSuccess ? "feedback-success" : "feedback-error";
+            feedbackDiv.innerHTML = message;
+            feedbackDiv.style.display = "block";
+            
+            // Hide feedback after 5 seconds
+            setTimeout(function() {
+                feedbackDiv.style.display = "none";
+            }, 5000);
+        }
+
+        /**
+         * Save ID settings - calls library function via bound script helper
+         */
+        function saveIdSettings() {
+            showSpinner(); // Show spinner before the script call
+            
+            var settingsData = {
+                WEPtemplateID: document.getElementById("WEPtemplateID").value,
+                MainWEPfolderID: document.getElementById("MainWEPfolderID").value,
+                InitialGoalsFormID: document.getElementById("InitialGoalsFormID").value,
+                MidYearProgressFormID: document.getElementById("MidYearProgressFormID").value,
+                FinalProgressFormID: document.getElementById("FinalProgressFormID").value
+            };
+
+            // Call the bound script helper function using callLibraryNS pattern
+            google.script.run
+                .withSuccessHandler(function(response) {
+                    hideSpinner(); // Hide spinner on success
+                    if (response.success) {
+                        showFeedback(response.message, true);
+                    } else {
+                        showFeedback(response.message, false);
+                    }
+                })
+                .withFailureHandler(function(error) {
+                    hideSpinner(); // Hide spinner on failure
+                    showFeedback("Error saving ID settings: " + error.message, false);
+                })
+                .callLibraryNS('WEPhelper.nsPropsSettings.helperSaveIdSettings', [settingsData]);
+        }
+
+        /**
+         * Save email settings - calls library function via bound script helper
+         */
+        function saveEmailSettings() {
+            showSpinner(); // Show spinner before the script call
+
+            var settingsData = {
+                subject: document.getElementById("subject").value,
+                greeting: document.getElementById("greeting").value,
+                closing: document.getElementById("closing").value,
+                linktime: document.getElementById("linkTime").value
+            };
+
+            // Call the bound script helper function using callLibraryNS pattern
+            google.script.run
+                .withSuccessHandler(function(response) {
+                    hideSpinner(); // Hide spinner on success
+                    if (response.success) {
+                        showFeedback(response.message, true);
+                    } else {
+                        showFeedback(response.message, false);
+                    }
+                })
+                .withFailureHandler(function(error) {
+                    hideSpinner(); // Hide spinner on failure
+                    showFeedback("Error saving email settings: " + error.message, false);
+                })
+                .callLibraryNS('WEPhelper.nsPropsSettings.helperSaveEmailSettings', [settingsData]);
+        }
+
+        /**
+         * Close the dialog
+         */
+        function closeDialog() {
+            google.script.host.close();
+        }
+
+        /**
+         * Show/hide settings tabs
+         */
+        function showSettings(tabName) {
+            var i;
+            var tabs = document.getElementsByClassName("settings");
+            for (i = 0; i < tabs.length; i++) {
+                tabs[i].style.display = "none";  
+            }
+            document.getElementById(tabName).style.display = "block";  
+        }
+    </script>
+</body>
+</html>

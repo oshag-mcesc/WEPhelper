@@ -376,7 +376,7 @@ const settingsTabs = (() => {
       reset: false,
       createIfMissing: true,
       hideAfterReset: true,
-      keys: ["WEPtemplateID", "MainWEPfolderID", "InitialGoalsFormID", "MidYearProgressFormID", "FinalProgressFormID", "rowNum"]
+      keys: ["WEPtemplateID", "MainWEPfolderID", "InitialGoalsFormID", "MidYearProgressFormID", "FinalProgressFormID", "rowNum","subject","greeting","closing","linktime"]
     }
   };
 
