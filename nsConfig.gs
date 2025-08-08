@@ -10,12 +10,17 @@ const CONFIG = {
     INITIAL_GOALS_FORM_ID: 'InitialGoalsFormID',
     MID_YEAR_PROGRESS_FORM_ID: 'MidYearProgressFormID',
     FINAL_PROGRESS_FORM_ID: 'FinalProgressFormID',
-    ROW_NUM: 'rowNum'  
+    ROW_NUM: 'rowNum',
+    EMAIL_SUBJECT: "subject",
+    EMAIL_GREETING: "greeting",
+    EMAIL_CLOSING: "closing",
+    EMAIL_LINK_TIME: "linktime"
   },
   
   // Sheet name
   SHEET_NAME: 'config'
 };
+
 
 /**
  * Helper function to get config values using the centralized keys

@@ -1,21 +1,74 @@
 <!DOCTYPE html>
 <html>
-  <head>
+<head>
     <base target="_top">
-  </head>
-  <body>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            line-height: 1.6;
+            color: #333;
+            max-width: 600px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        
+        #greeting {
+            margin-bottom: 20px;
+            white-space: pre-line;
+        }
+        
+        #tableDiv {
+            margin: 20px 0;
+        }
+        
+        table {
+            border-collapse: collapse;
+            width: 30%;
+        }
+        
+        td {
+            padding: 5px 0px 5px 20px;
+            border: 1px solid #ddd;
+            vertical-align: top;
+        }
+        
+        a {
+            color: #1a73e8;
+            text-decoration: none;
+            font-weight: bold;
+        }
+        
+        a:hover {
+            text-decoration: underline;
+        }
+        
+        #closing {
+            margin-top: 20px;
+            white-space: pre-line;
+        }
+        
+        tr:nth-child(even) {
+            background-color: #f9f9f9;
+        }
+        
+        tr:hover {
+            background-color: #f0f8ff;
+        }
+    </style>
+</head>
+<body>
     <div id="greeting">
-      <?!= greeting ?>
+        <?!= greeting ?>
     </div>
-    <br/>
+    
     <div id="tableDiv">
-      <table>
-          <?!= theRows ?>
-      </table>
+        <table>
+            <?!= theRows ?>
+        </table>
     </div>
-    <br/>
+    
     <div id="closing">
-      <?!= closing ?>
+        <?!= closing ?>
     </div>
-  </body>
+</body>
 </html>

@@ -3,6 +3,7 @@ function onOpen() {
   ui.createMenu('EXPERIMENTAL')
     .addItem("Get Served Area", "WEPhelper.nsServedGiftedRouter.servedGiftedStandard")
     .addItem("Show Settings", "WEPhelper.nsPropsSettings.helperShowSettingsDialog")
+    .addItem("Link Emailer", "WEPhelper.nsWEPemail.emailLinks")
     .addSubMenu(ui.createMenu('Initial WEPs')
       .addItem('Create Initial WEPs', 'WEPhelper.createWEPdocs.createInitialWEPs')
       .addItem('Add Classes Info', 'WEPhelper.showAlert')
@@ -31,4 +32,11 @@ const showAlert_ = () => {
 //needed globals for library work
 var showAlert = showAlert_
 
+
+/**
+ * Some names that are not the same as the file names:
+ * Name in Menu | file name or code name
+ * nsWEPemail   | nsEmailer
+ * createWEPdocs | createWEPdocs1
+ */
 
