@@ -4,6 +4,10 @@ function onOpen() {
     .addItem("Get Served Area", "WEPhelper.nsServedGiftedRouter.servedGiftedStandard")
     .addItem("Show Settings", "WEPhelper.nsPropsSettings.helperShowSettingsDialog")
     .addItem("Link Emailer", "WEPhelper.nsWEPemail.emailLinks")
+    .addSubMenu(ui.createMenu('Prefilled URLs')
+      .addItem('Create Initial URLs', 'WEPhelper.nsPropsURLCreator.helperCreateInitialURLs')
+      .addItem('Create Mid URLs', 'WEPhelper.nsPropsURLCreator.helperCreateMidURLs')
+      .addItem('Create Final URLs', 'WEPhelper.nsPropsURLCreator.helperCreateFinalURLs'))
     .addSubMenu(ui.createMenu('Initial WEPs')
       .addItem('Create Initial WEPs', 'WEPhelper.createWEPdocs.createInitialWEPs')
       .addItem('Add Classes Info', 'WEPhelper.addClassesToTable')
@@ -41,6 +45,7 @@ var showAlert = showAlert_
  * createWEPdocs | createWEPdocs1
  */
 
-function perms(){
+function perms() {
   let file = DriveApp.getFileById("1M_gRvGl64WU27y6S0fvQ5xGt0fUf8dNds9QY9FmFfyU")
 }
+
