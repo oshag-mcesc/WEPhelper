@@ -18,7 +18,7 @@ const CONFIG = {
   },
   
   // Sheet name
-  SHEET_NAME: 'config'
+  SHEET_NAME: 'config',
 };
 
 

@@ -24,9 +24,9 @@ var logError = logIt
 
 const testLog=()=>{
       logIt({
-        level:"severe",
+        level:"info",
         theMsg:"Error in emailing links",
-        error:"Bad news!"
+        //error:"Bad news!"
       })
 }
 

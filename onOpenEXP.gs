@@ -6,8 +6,8 @@ function onOpen() {
     .addItem("Link Emailer", "WEPhelper.nsWEPemail.emailLinks")
     .addSubMenu(ui.createMenu('Initial WEPs')
       .addItem('Create Initial WEPs', 'WEPhelper.createWEPdocs.createInitialWEPs')
-      .addItem('Add Classes Info', 'WEPhelper.showAlert')
-      .addItem('Push Initial Goals', 'WEPhelper.showAlert'))
+      .addItem('Add Classes Info', 'WEPhelper.addClassesToTable')
+      .addItem('Perms', 'WEPhelper.perms'))
     .addSeparator()
     .addItem("Show Alert", "WEPhelper.showAlert")
     .addItem("Push Mid Years", "WEPhelper.pushMidUpdate")
@@ -25,6 +25,7 @@ function onOpen() {
     .addToUi()
 }
 
+
 const showAlert_ = () => {
   SpreadsheetApp.getUi().alert("Yo! You did it!")
 }
@@ -40,3 +41,6 @@ var showAlert = showAlert_
  * createWEPdocs | createWEPdocs1
  */
 
+function perms(){
+  let file = DriveApp.getFileById("1M_gRvGl64WU27y6S0fvQ5xGt0fUf8dNds9QY9FmFfyU")
+}
