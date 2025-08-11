@@ -11,7 +11,7 @@ function onOpen() {
     .addSubMenu(ui.createMenu('Initial WEPs')
       .addItem('Create Initial WEPs', 'WEPhelper.createWEPdocs.createInitialWEPs')
       .addItem('Add Classes Info', 'WEPhelper.addClassesToTable')
-      .addItem('Perms', 'WEPhelper.perms'))
+      .addItem('Push Initial Goals', 'WEPhelper.pushInitialGoals'))
     .addSeparator()
     .addItem("Show Alert", "WEPhelper.showAlert")
     .addItem("Push Mid Years", "WEPhelper.pushMidUpdate")
@@ -26,6 +26,12 @@ function onOpen() {
       .addItem("HH Get Served", "WEPhelper.nsServedGiftedRouter.servedGiftedHH")
       .addItem("Run Test", "WEPhelper.testIt_g")
       .addItem("Test Log", "WEPhelper.testLog1"))
+    .addSeparator()
+    .addSubMenu(ui.createMenu('Helpers')
+      .addItem('Get DocID list', 'getDocIdList')
+      .addItem('Quick DocID list', 'quickDocList')
+      .addItem('Delete files in folder', 'deleteTheFiles')
+      .addItem('Toggle Tab Visibility', 'toggleTabVisibility'))
     .addToUi()
 }
 

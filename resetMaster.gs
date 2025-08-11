@@ -346,7 +346,10 @@ const settingsTabs = (() => {
         A1: `=QUERY(copiedMidYears!B2:H,"Select B, C, D, E, F, G  where B is not null AND H = 'Y' order by B label B 'studlastfirst', C 'studentnumber', D 'coursename', E 'teacherlastfirst',F 'goal',G 'progress'",1)`,
         I1: `={"docID";FILTER(ARRAYFORMULA(VLOOKUP(B2:B&"",StudInfo,8,false)),NOT(ISBLANK(A2:A)))}`,
         J1: `={"Teacher","Class / Course","Progress";D2:D,C2:C,F2:F}`
-      }
+      },
+      rngCell:"I1",
+      rowTitle:"Mid Year Progress",
+      statusCol:14 //column N
     },
     forFinalEvaluation: {
       name: 'forFinalEvaluation',
@@ -369,7 +372,10 @@ const settingsTabs = (() => {
         A1: `=QUERY(copiedFinals!B1:I,"Select B, C, D, E, F, G, H  where B is not null AND I = 'Y' order by B label B 'studlastfirst', C 'studentnumber', D 'coursename', E 'teacherlastfirst',G 'progress'",1)`,
         J1: `={"docID";FILTER(ARRAYFORMULA(VLOOKUP(B2:B&"",StudInfo,8,false)),NOT(ISBLANK(A2:A)))}`,
         K1: `={"Teacher","Class / Course","Progress";D2:D,C2:C,F2:F}`
-      }
+      },
+      rngCell:"J1",
+      rowTitle:"Final Evaluation",
+      statusCol:15  // column O
     },
     config: {
       name: 'config',
@@ -382,3 +388,4 @@ const settingsTabs = (() => {
 
   return ns;
 })();
+
