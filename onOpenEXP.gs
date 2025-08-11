@@ -1,6 +1,6 @@
 function onOpen() {
   let ui = SpreadsheetApp.getUi()
-  ui.createMenu('EXPERIMENTAL')
+  ui.createMenu('WEP Scripts')
     .addItem("Get Served Area", "WEPhelper.nsServedGiftedRouter.servedGiftedStandard")
     .addItem("Show Settings", "WEPhelper.nsPropsSettings.helperShowSettingsDialog")
     .addItem("Link Emailer", "WEPhelper.nsWEPemail.emailLinks")
@@ -19,11 +19,16 @@ function onOpen() {
     .addSeparator()
     .addSubMenu(ui.createMenu("Admin")
       .addItem("Reset Sheets", "WEPhelper.reset1.resetEm")
+      .addSubMenu(ui.createMenu('Create Forms')
+          .addItem('Create Mid Year Form','WEPhelper.showMessage')
+          .addItem('Create Final Eval FOrm','WEPhelper.showMessage'))
       .addItem("Run Test", "WEPhelper.testIt_g")
       .addItem("Test Log", "WEPhelper.testLog1"))
     .addSeparator()
     .addSubMenu(ui.createMenu("Specials")
       .addItem("HH Get Served", "WEPhelper.nsServedGiftedRouter.servedGiftedHH")
+      .addItem('Get Gifted Served', 'FBservedGifted')
+      .addItem('Get Gifted Served', 'BVCKservedGifted')
       .addItem("Run Test", "WEPhelper.testIt_g")
       .addItem("Test Log", "WEPhelper.testLog1"))
     .addSeparator()
@@ -39,10 +44,14 @@ function onOpen() {
 const showAlert_ = () => {
   SpreadsheetApp.getUi().alert("Yo! You did it!")
 }
+const showMessage_ = () =>{
+    SpreadsheetApp.getUi().alert("Coming soon!!")
+
+}
 
 //needed globals for library work
 var showAlert = showAlert_
-
+var showMessage = showMessage_
 
 /**
  * Some names that are not the same as the file names:
