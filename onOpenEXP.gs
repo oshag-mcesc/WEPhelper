@@ -19,6 +19,8 @@ function onOpen() {
     .addSeparator()
     .addSubMenu(ui.createMenu("Admin")
       .addItem("Reset Sheets", "WEPhelper.reset1.resetEm")
+      .addItem("Migrate Props", "migratePropertiesToConfig")
+      .addItem("VIEW Props", "WEPhelper.viewCurrentProperties")
       .addSubMenu(ui.createMenu('Create Forms')
           .addItem('Create Mid Year Form','WEPhelper.showMessage')
           .addItem('Create Final Eval FOrm','WEPhelper.showMessage'))

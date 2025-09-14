@@ -7,7 +7,7 @@
 const EMAIL_CONFIG = {
   linkTimeTab: {
     initial: "forGoalLinks",
-    mid: "forMidYear", 
+    mid: "forMidYear",
     final: "forFinalEvaluation"
   }
 };
@@ -15,62 +15,65 @@ const EMAIL_CONFIG = {
 /**
  * Main email namespace - contains all email functionality
  */
-const nsEmailer = (function() {
-  
+const nsEmailer = (function () {
+
   /**
    * Main function to handle the email sending process
    * Gets data from sheet, confirms with user, and sends emails
    */
   function emailLinks() {
     let done = false; // to let calling function know if we are good or not
-    
+
     try {
       const ss = SpreadsheetApp.getActiveSpreadsheet();
-      
+
       // Get settings using cSettings
       const cSettings = getSettingsInstance('config');
       const linktime = cSettings.getSetting('linktime') || 'initial';
-      
+
       // Get the correct tab name based on linktime setting
       const tab = EMAIL_CONFIG.linkTimeTab[linktime];
-      
+
       if (!tab) {
         throw new Error(`Invalid linktime setting: ${linktime}`);
       }
-      
+
       const ws = ss.getSheetByName(tab);
-      
+
       if (!ws) {
         throw new Error(`Sheet "${tab}" not found. Please check your linktime setting.`);
       }
-      
+
       const [header, ...allData] = ws.getDataRange().getValues();
-      
-      // Get unique array of teacher emails
-      const teacherEmailIndex = header.indexOf("teacheremail");
-      const preFilledURLIndex = header.indexOf("PreFilledURL");
-      const linksIndex = header.indexOf("Links");
-      
+
+      // Create a new array of lowercase headers for reliable, case-insensitive matching
+      const lowerCaseHeaders = header.map(h => h.toLowerCase());
+
+      // Get the index of each column using the new lowercase header array
+      const teacherEmailIndex = lowerCaseHeaders.indexOf("teacheremail");
+      const preFilledURLIndex = lowerCaseHeaders.indexOf("prefilledurl");
+      const linksIndex = lowerCaseHeaders.indexOf("links");
+
       if (teacherEmailIndex === -1 || preFilledURLIndex === -1 || linksIndex === -1) {
         throw new Error("Required columns (teacheremail, PreFilledURL, Links) not found in sheet");
       }
-      
+
       const teachEmail = [...new Set(allData.map(row => row[teacherEmailIndex]))];
-      
+
       // Map the data we need
       const info = allData.map(row => [
         row[teacherEmailIndex],
-        row[preFilledURLIndex], 
+        row[preFilledURLIndex],
         row[linksIndex]
       ]);
-      
+
       const ui = SpreadsheetApp.getUi();
       const result = ui.alert(
         'Please confirm',
         `You are sending a total of ${info.length} links for "${tab}". \nAre you sure you want to continue?`,
         ui.ButtonSet.YES_NO
       );
-      
+
       // Process the user's response
       if (result == ui.Button.YES) {
         // Get email settings
@@ -79,18 +82,18 @@ const nsEmailer = (function() {
           greeting: cSettings.getSetting('greeting') || 'Hello,',
           closing: cSettings.getSetting('closing') || 'Thank you.'
         };
-        
+
         logIt({
           level: "info",
           theMsg: `Starting to send ${teachEmail.length} emails for ${tab}`
         });
-        
+
         // Send progress notification
         showProgress(true);
-        
+
         for (let i = 0; i < teachEmail.length; i++) {
           const data = info.filter(row => teachEmail[i] === row[0]);
-          
+
           const emailInfo = {
             recipient: teachEmail[i],
             data: data,
@@ -98,20 +101,20 @@ const nsEmailer = (function() {
             greeting: emailSettings.greeting,
             closing: emailSettings.closing
           };
-          
+
           sendTheMail(emailInfo);
         }
-        
+
         showProgress(false);
         done = true;
-        
+
         logIt({
           level: "info",
           theMsg: `Successfully sent emails to ${teachEmail.length} recipients`
         });
-        
+
         ui.alert('Success!', `Emails sent successfully to ${teachEmail.length} recipients.`, ui.ButtonSet.OK);
-        
+
       } else {
         // User clicked "No" or X in the title bar
         ui.alert('Email aborted.');
@@ -120,7 +123,7 @@ const nsEmailer = (function() {
           theMsg: "Email sending aborted by user"
         });
       }
-      
+
     } catch (err) {
       showProgress(false);
       logIt({
@@ -128,14 +131,14 @@ const nsEmailer = (function() {
         theMsg: "Error in email links process",
         error: err
       });
-      
+
       SpreadsheetApp.getUi().alert('Error!', 'Something went wrong emailing links: ' + err.message, SpreadsheetApp.getUi().ButtonSet.OK);
       throw err;
     }
-    
+
     return done;
   }
-  
+
   /**
    * Send individual email with links
    * @param {Object} emailInfo - The emailInfo object
@@ -151,26 +154,26 @@ const nsEmailer = (function() {
       const theRows = emailInfo.data.map(row => {
         return `<tr><td><a href="${row[1]}">${row[2]}</a></td></tr>`;
       }).join('');
-      
+
       const temp = HtmlService.createTemplateFromFile("emailTemplate");
       temp.theRows = theRows;
       temp.greeting = emailInfo.greeting;
       temp.closing = emailInfo.closing;
-      
+
       const html = temp.evaluate().getContent().toString();
-      
+
       GmailApp.sendEmail(
         emailInfo.recipient,
         emailInfo.subject,
         "Body",
         { htmlBody: html }
       );
-      
+
       logIt({
         level: 'info',
         theMsg: `Email sent to ${emailInfo.recipient}`
       });
-      
+
     } catch (err) {
       logIt({
         level: "severe",
@@ -180,7 +183,7 @@ const nsEmailer = (function() {
       throw err;
     }
   }
-  
+
   /**
    * Show/hide progress indicator
    * @param {boolean} show - Whether to show or hide progress
@@ -196,7 +199,7 @@ const nsEmailer = (function() {
         });
       } else {
         logIt({
-          level: "info", 
+          level: "info",
           theMsg: "Email sending process completed - hiding progress"
         });
       }
@@ -208,7 +211,7 @@ const nsEmailer = (function() {
       });
     }
   }
-  
+
   /**
    * Get email settings for preview or testing
    * @returns {Object} Current email settings
@@ -236,7 +239,7 @@ const nsEmailer = (function() {
       };
     }
   }
-  
+
   // Return public interface
   return {
     emailLinks: emailLinks,
@@ -244,15 +247,15 @@ const nsEmailer = (function() {
     getEmailSettings: getEmailSettings,
     showProgress: showProgress
   };
-  
+
 })();
 
 /**
  * Namespace for email-related helper functions
  * These functions handle the interaction between bound script and library functions
  */
-var nsPropsEmailer = (function() {
-  
+var nsPropsEmailer = (function () {
+
   /**
    * Helper function to send email links
    * Called from bound script via callLibraryNS
@@ -269,7 +272,7 @@ var nsPropsEmailer = (function() {
       throw new Error("Error sending email links: " + error.message);
     }
   }
-  
+
   /**
    * Helper function to get email settings
    * Called from bound script via callLibraryNS
@@ -286,7 +289,7 @@ var nsPropsEmailer = (function() {
       return {};
     }
   }
-  
+
   /**
    * Helper function to send individual email (for testing)
    * Called from bound script via callLibraryNS
@@ -296,21 +299,21 @@ var nsPropsEmailer = (function() {
       return nsEmailer.sendTheMail(emailInfo);
     } catch (error) {
       logIt({
-        level: "severe", 
+        level: "severe",
         theMsg: "Error sending test email",
         error: error
       });
       throw new Error("Error sending test email: " + error.message);
     }
   }
-  
+
   // Return public interface
   return {
     helperEmailLinks: helperEmailLinks,
     helperGetEmailSettings: helperGetEmailSettings,
     helperSendTestEmail: helperSendTestEmail
   };
-  
+
 })();
 
 // Make nsEmailer available globally for backward compatibility if needed

@@ -241,7 +241,7 @@ const settingsTabs = (() => {
     original: {
       name: 'ORIGINAL',
       reset: true,
-      headers: ['SchoolCode', 'StudentId', 'StateStudentId', 'FirstName', 'LastName', 'Gender', 'GradeLevelCode', 'HomeSchoolIRN', 'HomeSchool', 'ProgramCode', 'ProgramName', 'Status', 'StudentStatusCode', 'CourseCode', 'CourseName', 'CourseTypeCode', 'CourseTypeDescription', 'SectionNumber', 'TermCode', 'TermName', 'LocationEx', 'TeacherCode', 'CalendarPeriodCode', 'RotationDays']
+      headers: ['SchoolCode', 'StudentNumber', 'StateStudentId', 'FirstName', 'LastName', 'Gender', 'GradeLevelCode', 'HomeSchoolIRN', 'HomeSchool', 'ProgramCode', 'ProgramName', 'Status', 'StudentStatusCode', 'CourseCode', 'CourseName', 'CourseTypeCode', 'CourseTypeDescription', 'SectionNumber', 'TermCode', 'TermName', 'LocationEx', 'TeacherCode', 'CalendarPeriodCode', 'RotationDays']
     },
     rawData: {
       name: 'rawData',
@@ -253,9 +253,8 @@ const settingsTabs = (() => {
     gifted: {
       name: 'gifted',
       reset: true,
-      headers: ['SchoolCode', 'StudentId', 'StateStudentId', 'FirstName', 'LastName', 'Gender', 'GradeLevelCode', 'HomeSchoolIRN', 'HomeSchool', 'ProgramCode', 'ProgramName', 'Status', 'StudentStatusCode', 'CourseCode', 'CourseName', 'CourseTypeCode', 'CourseTypeDescription', 'SectionNumber', 'TermCode', 'TermName', 'LocationEx', 'TeacherCode', 'CalendarPeriodCode', 'RotationDays'],
       formulas: {
-        A2: `=filter(rawdata!A2:X,MATCH(rawdata!B2:B&"",index(StudInfo,,1),0))`
+        A1: `=filter(rawdata!A1:X,{TRUE; MATCH(rawdata!B2:B&"",index(StudInfo,,1),0)})`
       }
     },
     preQuery: {
@@ -264,7 +263,7 @@ const settingsTabs = (() => {
       formulas: {
         A1: `=query(gifted!A1:W,"select E, D, F, B, G, N, O, A, V,W where A is not null label G 'Grade', E 'StudLast', D 'StudFirst', B 'studentnumber', O 'Course', W 'Period'", 1)`,
         K1: `={"GiftedArea","GiftedCourse";arrayformula(if(isblank(D2:D),,VLOOKUP(D2:D,StudInfo,6,false))),arrayformula(if(isblank(F2:F),,VLOOKUP(F2:F,CourseInfo,4,false)))}`,
-        N1: `={"StudLastFirst","TeacherLastFirst","TeacherEmail";arrayformula(if(isblank(D2:D),,VLOOKUP(D2:D,StudInfo,2,false))),arrayformula(if(isblank(I2:I),,VLOOKUP(I2:I,TeacherInfo,2,false))),arrayformula(if(isblank(I2:I),,VLOOKUP(I2:I,TeacherInfo,5,false)))}`
+        N1: `={"StudLastFirst","TeacherLastFirst","teachermail";arrayformula(if(isblank(D2:D),,VLOOKUP(D2:D,StudInfo,2,false))),arrayformula(if(isblank(I2:I),,VLOOKUP(I2:I,TeacherInfo,2,false))),arrayformula(if(isblank(I2:I),,VLOOKUP(I2:I,TeacherInfo,5,false)))}`
       }
     },
     theGiftedData: {
@@ -272,7 +271,8 @@ const settingsTabs = (() => {
       reset: true,
       formulas: {
         A1: `=query(preQuery!A1:P,"Select * where M <> 'NONE'and A is not null order by A",1)`,
-        Q1: `="New"`
+        Q1: `="New"`,
+        U1: `={D1:D,G1:G,N1:O}`
       }
     },
     forGoalLinks: {
