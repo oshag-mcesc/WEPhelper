@@ -55,7 +55,7 @@ const nsEmailer = (function () {
       const linksIndex = lowerCaseHeaders.indexOf("links");
 
       if (teacherEmailIndex === -1 || preFilledURLIndex === -1 || linksIndex === -1) {
-        throw new Error("Required columns (teacheremail, PreFilledURL, Links) not found in sheet");
+        throw new Error("Required columns (TeacherEmail, PreFilledURL, Links) not found in sheet");
       }
 
       const teachEmail = [...new Set(allData.map(row => row[teacherEmailIndex]))];

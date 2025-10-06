@@ -263,7 +263,7 @@ const settingsTabs = (() => {
       formulas: {
         A1: `=query(gifted!A1:W,"select E, D, F, B, G, N, O, A, V,W where A is not null label G 'Grade', E 'StudLast', D 'StudFirst', B 'studentnumber', O 'Course', W 'Period'", 1)`,
         K1: `={"GiftedArea","GiftedCourse";arrayformula(if(isblank(D2:D),,VLOOKUP(D2:D,StudInfo,6,false))),arrayformula(if(isblank(F2:F),,VLOOKUP(F2:F,CourseInfo,4,false)))}`,
-        N1: `={"StudLastFirst","TeacherLastFirst","teachermail";arrayformula(if(isblank(D2:D),,VLOOKUP(D2:D,StudInfo,2,false))),arrayformula(if(isblank(I2:I),,VLOOKUP(I2:I,TeacherInfo,2,false))),arrayformula(if(isblank(I2:I),,VLOOKUP(I2:I,TeacherInfo,5,false)))}`
+        N1: `={"StudLastFirst","TeacherLastFirst","TeacherEmail";arrayformula(if(isblank(D2:D),,VLOOKUP(D2:D,StudInfo,2,false))),arrayformula(if(isblank(I2:I),,VLOOKUP(I2:I,TeacherInfo,2,false))),arrayformula(if(isblank(I2:I),,VLOOKUP(I2:I,TeacherInfo,5,false)))}`
       }
     },
     theGiftedData: {
