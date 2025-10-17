@@ -322,7 +322,7 @@ const settingsTabs = (() => {
       formulas: {
         A1: `=QUERY(copiedGoals!B1:K,"Select * where B is not null AND K='Y' order by B label B 'studlastfirst', C 'studentnumber', D 'giftedarea', E 'teacherlastfirst', F 'coursename',G 'instructionalstrategies', H 'assesstools', J 'odeisandcode'",1)`,
         L1: `={"docID";FILTER(ARRAYFORMULA(VLOOKUP(B2:B&"",StudInfo,8,false)),NOT(ISBLANK(A2:A)))}`,
-        M1: `={"Teacher","Class / Course","Content Goal";D2:D,E2:E,H2:H}`
+        M1: `={"Teacher","Class / Course","Instructional Strategies for Service","Measures to Determine Student Growth","Content Goal";D2:H}`
       }
     },
     forMidYear: {

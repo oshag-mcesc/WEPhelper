@@ -1,3 +1,24 @@
+//Helper function to get a list of doc ids
+function helper_getListOfDocIds(){
+  try{
+    const docIdtab = SpreadsheetApp.getActiveSpreadsheet().getSheetByName("docIDs")
+    const docFolderId = getSettingValue("MainWEPfolderID")
+    if(!docIdtab){throw "DocID tab is missing."}
+    if(!docFolderId){throw "WEP Doc folder id missing or blank."}
+    
+    let rslt = getListOfDocIds(docFolderId,docIdtab)
+  }
+  catch(err){
+    logIt({
+      level: "severe",
+      theMsg: "Error showing settings dialog",
+      error: err
+      })
+    return false
+  }
+}
+
+
 /**
  * Generates a list of docIds and titles to check
  * 
