@@ -9,11 +9,11 @@
 //These 2 functions are called from the menu.
 //They use nsConfig info to send to the "middle man" function
 const pushMidUpdate1 = ()=>{
-  configPushUpdates(nsSettings.tabs.forMidYearPush)
+  configPushUpdates(nsConfig.tabs.forMidYearPush)
 }
 
 const pushFinalUpdate1 = ()=>{
-  configPushUpdates(nsSettings.tabs.forFinalPush)
+  configPushUpdates(nsConfig.tabs.forFinalPush)
 }
 
 //needed to be called from the library

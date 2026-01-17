@@ -320,7 +320,7 @@ const WEPs = (() => {
             });
             
             logIt({ 
-              level: "warn", 
+              level: "warning", 
               theMsg: `Row ${currentRowNumber}: Validation failed for ${row.studlastfirst || 'Unknown'} - Missing: ${rowValidation.missingFields.join(', ')}` 
             });
             
@@ -404,7 +404,7 @@ const WEPs = (() => {
           });
           
           logIt({ 
-            level: "error", 
+            level: "severe", 
             theMsg: `Row ${currentRowNumber}: Unexpected error processing ${row.studlastfirst || 'Unknown'} - ${err.message}` 
           });
           
