@@ -30,7 +30,7 @@ const reset = (() => {
    */
   const resetEm = () => {
     const ss = SpreadsheetApp.getActiveSpreadsheet();
-    
+
     try {
       // Notify user that reset process has started
       SpreadsheetApp.getActiveSpreadsheet().toast("Resetting spreadsheet for new year...", "Starting Reset", -1);
@@ -159,7 +159,7 @@ const reset = (() => {
         for (const cell in tabConfig.notes) {
           sheet.getRange(cell).setNote(tabConfig.notes[cell]);
         }
-      }      
+      }
     }
 
     /**
@@ -233,64 +233,68 @@ var reset1 = reset;
  */
 const settingsTabs = (() => {
   const ns = {};
-  
+
   /**
    * @property {Object.<string, TabConfiguration>} tabs
    * @description Object containing all tab configurations indexed by tab identifier.
    * Each tab configuration defines how that tab should be handled during reset operations.
    */
   ns.tabs = {
-    template1: {
-      name: 'Template 1',
-      reset: false
+    config: {
+      name: 'config',
+      reset: false,
+      createIfMissing: true,
+      hideAfterReset: true,
+      keys: ["WEPtemplateID", "MainWEPfolderID", "InitialGoalsFormID", "MidYearProgressFormID", "FinalProgressFormID", "rowNum", "subject", "greeting", "closing", "linktime"]
     },
-    original: {
-      name: 'ORIGINAL',
-      reset: true,
-      headers: ['SchoolCode', 'StudentNumber', 'StateStudentId', 'FirstName', 'LastName', 'Gender', 'GradeLevelCode', 'HomeSchoolIRN', 'HomeSchool', 'ProgramCode', 'ProgramName', 'Status', 'StudentStatusCode', 'CourseCode', 'CourseName', 'CourseTypeCode', 'CourseTypeDescription', 'SectionNumber', 'TermCode', 'TermName', 'LocationEx', 'TeacherCode', 'CalendarPeriodCode', 'RotationDays']
-    },
-    rawData: {
-      name: 'rawData',
+    copiedFinals: {
+      name: 'copiedFinals',
       reset: true,
       formulas: {
-        A1: `=filter(original!A1:X,MATCH(original!N1:N&"",index(CourseInfo,,1),0))`
+        I1: `="New"`
+      },
+      notes: {
+        I1: `Use F for Final push`
       }
     },
-    gifted: {
-      name: 'gifted',
+    copiedGoals: {
+      name: 'copiedGoals',
       reset: true,
       formulas: {
-        A1: `=filter(rawdata!A1:X,{TRUE; MATCH(rawdata!B2:B&"",index(StudInfo,,1),0)})`
+        J1: `={"ODEISandcode";FILTER(ARRAYFORMULA(VLOOKUP(F2:F,OFFSET(CourseInfo,,1),2,false)),NOT(ISBLANK(C2:C)))}`,
+        K1: `="New"`,
+        L1: `={"teacheremail";ARRAYFORMULA(IF(A2:A="","",IF(C2:C="","MISSING ID",IFERROR(VLOOKUP(E2:E, OFFSET(TeacherInfo,,1), 4, FALSE),"MISSING EMAIL"))))}}`,
+        U1: `=QUERY(B1:L, "Select C, F, B, E where C is not null",1)`,
+        K1: `=New`
+      },
+      notes: {
+        K1: `Use Y to push classes and goals`
       }
     },
-    preQuery: {
-      name: 'preQuery',
+    copiedMidYears: {
+      name: 'copiedMidYears',
       reset: true,
       formulas: {
-        A1: `=query(gifted!A1:W,"select E, D, F, B, G, N, O, A, V,W where A is not null label G 'Grade', E 'StudLast', D 'StudFirst', B 'studentnumber', O 'Course', W 'Period'", 1)`,
-        K1: `={"GiftedArea","GiftedCourse";arrayformula(if(isblank(D2:D),,VLOOKUP(D2:D,StudInfo,6,false))),arrayformula(if(isblank(F2:F),,VLOOKUP(F2:F,CourseInfo,4,false)))}`,
-        N1: `={"StudLastFirst","TeacherLastFirst","TeacherEmail";arrayformula(if(isblank(D2:D),,VLOOKUP(D2:D,StudInfo,2,false))),arrayformula(if(isblank(I2:I),,VLOOKUP(I2:I,TeacherInfo,2,false))),arrayformula(if(isblank(I2:I),,VLOOKUP(I2:I,TeacherInfo,5,false)))}`
+        H1: `="New"`,
+        I1: `={"teacheremail";ARRAYFORMULA(IF(A2:A="","",IF(C2:C="","MISSING ID",IFERROR(VLOOKUP(E2:E, OFFSET(TeacherInfo,,1), 4, FALSE),"MISSING EMAIL"))))}`,
+        U1: `=QUERY(B1:L, "Select C, D, B, E where C is not null",1)`
+      },
+      notes: {
+        H1: `Use F for final links\nUse M for midyear push`
       }
     },
-    theGiftedData: {
-      name: 'theGiftedData',
+    docIds: {
+      name: 'docIds',
+      reset: true
+    },
+    forClasses: {
+      name: 'forClasses',
       reset: true,
       formulas: {
-        A1: `=query(preQuery!A1:P,"Select * where M <> 'NONE'and A is not null order by A",1)`,
-        Q1: `="New"`,
-        U1: `={D1:D,G1:G,N1:O}`
+        A1: `=query(copiedGoals!B1:K,"Select B, C, F, J where B is not null AND K ='Y' order by B", 1)`,
+        E1: `={"codeDescription","docID","courseGifted";filter(ARRAYFORMULA(VLOOKUP(D2:D+0,emisDescriptions,3,false)),NOT(ISBLANK(A2:A))),filter(ARRAYFORMULA(VLOOKUP(B2:B&"",StudInfo,8,false)),NOT(ISBLANK(A2:A))),filter(ARRAYFORMULA(VLOOKUP(C2:C,offset(CourseInfo,,1),3,false)),NOT(ISBLANK(A2:A)))}`,
+        I1: `=QUERY(A1:G,"Select F, G, C, E where F is not null order by A",1)`
       }
-    },
-    forGoalLinks: {
-      name: 'forGoalLinks',
-      reset: true,
-      formulas: {
-        A1: `=query(theGiftedData!A1:Q,"Select N,D,M,O,G,P where A<>'' and Q ='Y' order by O,N",1)`
-      }
-    },
-    tcg: {
-      name: 'TeacherCourseGifted',
-      reset: false
     },
     forDocs: {
       name: 'forDocs',
@@ -300,27 +304,30 @@ const settingsTabs = (() => {
         H1: `={"filename";arrayformula(if(NOT(ISBLANK(A2:A)),B2:B & " " & A2:A,))}`
       }
     },
-    docIds: {
-      name: 'docIds',
-      reset: true
-    },
-    copiedGoals: {
-      name: 'copiedGoals',
+    forFinalEvaluation: {
+      name: 'forFinalEvaluation',
       reset: true,
       formulas: {
-        J1: `={"ODEISandcode";FILTER(ARRAYFORMULA(VLOOKUP(F2:F,OFFSET(CourseInfo,,1),2,false)),NOT(ISBLANK(C2:C)))}`,
-        K1: `="New"`,
-        L1: `={"teacherEmail";arrayformula(if(NOT(ISBLANK(E2:E)),VLOOKUP(E2:E,OFFSET(TeacherInfo,,1),4,false),))}`,
-        U1: `=QUERY(B1:L, "Select C, F, B, E where C is not null",1)`
+        A1: `=QUERY(copiedMidYears!B1:I,"Select B, C, D, E, F, G, H, I where B is not null AND H = 'F' order by E label B 'StudLastFirst', E 'teacherlastfirst', C 'studentnumber', I 'teacheremail', F 'goal', D 'coursename'",1)`
       }
     },
-    forClasses: {
-      name: 'forClasses',
+    forFinalPush: {
+      name: 'forFinalPush',
       reset: true,
       formulas: {
-        A1: `=query(copiedGoals!B1:K,"Select B, C, F, J where B is not null AND K ='Y' order by B", 1)`,
-        E1: `={"codeDescription","docID","courseGifted";filter(ARRAYFORMULA(VLOOKUP(D2:D+0,emisDescriptions,3,false)),NOT(ISBLANK(A2:A))),filter(ARRAYFORMULA(VLOOKUP(B2:B&"",StudInfo,8,false)),NOT(ISBLANK(A2:A))),filter(ARRAYFORMULA(VLOOKUP(C2:C,offset(CourseInfo,,1),3,false)),NOT(ISBLANK(A2:A)))}`,
-        I1: `=QUERY(A1:G,"Select F, G, C, E where F is not null order by A",1)`
+        A1: `=QUERY(copiedFinals!B1:I,"Select B, C, D, E, F, G, H  where B is not null AND I = 'F' order by B label B 'studlastfirst', C 'studentnumber', D 'coursename', E 'teacherlastfirst',G 'progress'",1)`,
+        J1: `={"docID";FILTER(ARRAYFORMULA(VLOOKUP(B2:B&"",StudInfo,8,false)),NOT(ISBLANK(A2:A)))}`,
+        K1: `={"Teacher","Class / Course","Final Evaluation";D2:D,C2:C,G2:G}`
+      },
+      rngCell: "J1",
+      rowTitle: "Final Evaluation",
+      statusCol: 15
+    },
+    forGoalLinks: {
+      name: 'forGoalLinks',
+      reset: true,
+      formulas: {
+        A1: `=query(theGiftedData!A1:Q,"Select N,D,M,O,G,P where A<>'' and Q ='Y' order by O,N",1)`
       }
     },
     forGoals: {
@@ -339,18 +346,6 @@ const settingsTabs = (() => {
         A1: `=QUERY(copiedGoals!B1:L,"Select B, C, E, F, I, L where B is not null AND K='Y' order by E label B 'StudLastFirst', E 'teacherlastfirst', C 'studentnumber', L 'teacheremail', I 'goal', F 'coursename'",1)`
       }
     },
-    copiedMidYears: {
-      name: 'copiedMidYears',
-      reset: true,
-      formulas: {
-        H1: `="New"`,
-        I1: `={"teacheremail";FILTER(ARRAYFORMULA(VLOOKUP(E2:E,OFFSET(TeacherInfo,,1),4,false)),NOT(ISBLANK(C2:C)))}`,
-        U1: `=QUERY(B1:L, "Select C, F, B, E where C is not null",1)`
-      },
-      notes: {
-        H1: `Use F for final links\nUse Y for midyear push`
-      }
-    },
     forMidYearPush: {
       name: 'forMidYearPush',
       reset: true,
@@ -359,42 +354,54 @@ const settingsTabs = (() => {
         I1: `={"docID";FILTER(ARRAYFORMULA(VLOOKUP(B2:B&"",StudInfo,8,false)),NOT(ISBLANK(A2:A)))}`,
         J1: `={"Teacher","Class / Course","Progress";D2:D,C2:C,F2:F}`
       },
-      rngCell:"I1",
-      rowTitle:"Mid Year Progress",
-      statusCol:14 //column N
+      rngCell: "I1",
+      rowTitle: "Mid Year Progress",
+      statusCol: 14
     },
-    forFinalEvaluation: {
-      name: 'forFinalEvaluation',
+    gifted: {
+      name: 'gifted',
       reset: true,
       formulas: {
-        A1: `=QUERY(copiedMidYears!B1:I,"Select B, C, D, E, F, G, H, I where B is not null AND H = 'F' order by E label B 'StudLastFirst', E 'teacherlastfirst', C 'studentnumber', I 'teacheremail', F 'goal', D 'coursename'",1)`
+        A1: `=filter(rawdata!A1:X,{TRUE; MATCH(rawdata!B2:B&"",index(StudInfo,,1),0)})`
       }
     },
-    copiedFinals: {
-      name: 'copiedFinals',
+    original: {
+      name: 'ORIGINAL',
+      reset: true,
+      headers: ['SchoolCode', 'StudentNumber', 'StateStudentId', 'FirstName', 'LastName', 'Gender', 'GradeLevelCode', 'HomeSchoolIRN', 'HomeSchool', 'ProgramCode', 'ProgramName', 'Status', 'StudentStatusCode', 'CourseCode', 'CourseName', 'CourseTypeCode', 'CourseTypeDescription', 'SectionNumber', 'TermCode', 'TermName', 'LocationEx', 'TeacherCode', 'CalendarPeriodCode', 'RotationDays']
+    },
+    preQuery: {
+      name: 'preQuery',
       reset: true,
       formulas: {
-        I1: `="New"`
+        A1: `=query(gifted!A1:W,"select E, D, F, B, G, N, O, A, V,W where A is not null label G 'Grade', E 'StudLast', D 'StudFirst', B 'studentnumber', O 'Course', W 'Period'", 1)`,
+        K1: `={"GiftedArea","GiftedCourse";arrayformula(if(isblank(D2:D),,VLOOKUP(D2:D,StudInfo,6,false))),arrayformula(if(isblank(F2:F),,VLOOKUP(F2:F,CourseInfo,4,false)))}`,
+        N1: `={"StudLastFirst","TeacherLastFirst","TeacherEmail";arrayformula(if(isblank(D2:D),,VLOOKUP(D2:D,StudInfo,2,false))),arrayformula(if(isblank(I2:I),,VLOOKUP(I2:I,TeacherInfo,2,false))),arrayformula(if(isblank(I2:I),,VLOOKUP(I2:I,TeacherInfo,5,false)))}`
       }
     },
-    forFinalPush: {
-      name: 'forFinalPush',
+    rawData: {
+      name: 'rawData',
       reset: true,
       formulas: {
-        A1: `=QUERY(copiedFinals!B1:I,"Select B, C, D, E, F, G, H  where B is not null AND I = 'Y' order by B label B 'studlastfirst', C 'studentnumber', D 'coursename', E 'teacherlastfirst',G 'progress'",1)`,
-        J1: `={"docID";FILTER(ARRAYFORMULA(VLOOKUP(B2:B&"",StudInfo,8,false)),NOT(ISBLANK(A2:A)))}`,
-        K1: `={"Teacher","Class / Course","Final Evaluation";D2:D,C2:C,G2:G}`
-      },
-      rngCell:"J1",
-      rowTitle:"Final Evaluation",
-      statusCol:15  // column O
+        A1: `=filter(original!A1:X,MATCH(original!N1:N&"",index(CourseInfo,,1),0))`
+      }
     },
-    config: {
-      name: 'config',
-      reset: false,
-      createIfMissing: true,
-      hideAfterReset: true,
-      keys: ["WEPtemplateID", "MainWEPfolderID", "InitialGoalsFormID", "MidYearProgressFormID", "FinalProgressFormID", "rowNum","subject","greeting","closing","linktime"]
+    tcg: {
+      name: 'TeacherCourseGifted',
+      reset: false
+    },
+    template1: {
+      name: 'Template 1',
+      reset: false
+    },
+    theGiftedData: {
+      name: 'theGiftedData',
+      reset: true,
+      formulas: {
+        A1: `=query(preQuery!A1:P,"Select * where M <> 'NONE'and A is not null order by A",1)`,
+        Q1: `="New"`,
+        U1: `={D1:D,G1:G,N1:O}`
+      }
     }
   };
 
