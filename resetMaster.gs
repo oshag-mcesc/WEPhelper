@@ -154,6 +154,12 @@ const reset = (() => {
           sheet.getRange(cell).setFormula(tabConfig.formulas[cell]);
         }
       }
+      // Batch operation 4: Set notes if provided in configuration
+      if (tabConfig.notes) {
+        for (const cell in tabConfig.notes) {
+          sheet.getRange(cell).setNote(tabConfig.notes[cell]);
+        }
+      }      
     }
 
     /**
@@ -304,7 +310,8 @@ const settingsTabs = (() => {
       formulas: {
         J1: `={"ODEISandcode";FILTER(ARRAYFORMULA(VLOOKUP(F2:F,OFFSET(CourseInfo,,1),2,false)),NOT(ISBLANK(C2:C)))}`,
         K1: `="New"`,
-        L1: `={"teacherEmail";arrayformula(if(NOT(ISBLANK(E2:E)),VLOOKUP(E2:E,OFFSET(TeacherInfo,,1),4,false),))}`
+        L1: `={"teacherEmail";arrayformula(if(NOT(ISBLANK(E2:E)),VLOOKUP(E2:E,OFFSET(TeacherInfo,,1),4,false),))}`,
+        U1: `=QUERY(B1:L, "Select C, F, B, E where C is not null",1)`
       }
     },
     forClasses: {
@@ -336,7 +343,12 @@ const settingsTabs = (() => {
       name: 'copiedMidYears',
       reset: true,
       formulas: {
-        H1: `="New"`
+        H1: `="New"`,
+        I1: `={"teacheremail";FILTER(ARRAYFORMULA(VLOOKUP(E2:E,OFFSET(TeacherInfo,,1),4,false)),NOT(ISBLANK(C2:C)))}`,
+        U1: `=QUERY(B1:L, "Select C, F, B, E where C is not null",1)`
+      },
+      notes: {
+        H1: `Use F for final links\nUse Y for midyear push`
       }
     },
     forMidYearPush: {
@@ -355,7 +367,7 @@ const settingsTabs = (() => {
       name: 'forFinalEvaluation',
       reset: true,
       formulas: {
-        A1: `=QUERY(copiedMidYears!B1:I,"Select B, C, D, E, F, G, H, I where B is not null AND H = 'Y' order by E label B 'StudLastFirst', E 'teacherlastfirst', C 'studentnumber', I 'teacheremail', F 'goal', D 'coursename'",1)`
+        A1: `=QUERY(copiedMidYears!B1:I,"Select B, C, D, E, F, G, H, I where B is not null AND H = 'F' order by E label B 'StudLastFirst', E 'teacherlastfirst', C 'studentnumber', I 'teacheremail', F 'goal', D 'coursename'",1)`
       }
     },
     copiedFinals: {
