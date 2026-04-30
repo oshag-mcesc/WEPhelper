@@ -263,7 +263,7 @@ const settingsTabs = (() => {
       formulas: {
         J1: `={"ODEISandcode";FILTER(ARRAYFORMULA(VLOOKUP(F2:F,OFFSET(CourseInfo,,1),2,false)),NOT(ISBLANK(C2:C)))}`,
         K1: `="New"`,
-        L1: `={"teacheremail";ARRAYFORMULA(IF(A2:A="","",IF(C2:C="","MISSING ID",IFERROR(VLOOKUP(E2:E, OFFSET(TeacherInfo,,1), 4, FALSE),"MISSING EMAIL"))))}}`,
+        L1: `={"teacheremail";ARRAYFORMULA(IF(A2:A="","",IF(C2:C="","MISSING ID",IFERROR(VLOOKUP(E2:E, OFFSET(TeacherInfo,,1), 4, FALSE),"MISSING EMAIL"))))}`,
         U1: `=QUERY(B1:L, "Select C, F, B, E where C is not null",1)`,
         K1: `="New"`
       },
