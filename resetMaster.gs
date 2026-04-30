@@ -265,7 +265,7 @@ const settingsTabs = (() => {
         K1: `="New"`,
         L1: `={"teacheremail";ARRAYFORMULA(IF(A2:A="","",IF(C2:C="","MISSING ID",IFERROR(VLOOKUP(E2:E, OFFSET(TeacherInfo,,1), 4, FALSE),"MISSING EMAIL"))))}}`,
         U1: `=QUERY(B1:L, "Select C, F, B, E where C is not null",1)`,
-        K1: `=New`
+        K1: `="New"`
       },
       notes: {
         K1: `Use Y to push classes and goals`
