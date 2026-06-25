@@ -292,7 +292,7 @@ const settingsTabs = (() => {
       reset: true,
       formulas: {
         A1: `=query(copiedGoals!B1:K,"Select B, C, F, J where B is not null AND K ='Y' order by B", 1)`,
-        E1: `={"codeDescription","docID","courseGifted";filter(ARRAYFORMULA(VLOOKUP(D2:D+0,emisDescriptions,3,false)),NOT(ISBLANK(A2:A))),filter(ARRAYFORMULA(VLOOKUP(B2:B&"",StudInfo,8,false)),NOT(ISBLANK(A2:A))),filter(ARRAYFORMULA(VLOOKUP(C2:C,offset(CourseInfo,,1),3,false)),NOT(ISBLANK(A2:A)))}`,
+        E1: `={"codeDescription","docID","courseGifted";filter(ARRAYFORMULA(VLOOKUP(D2:D,emisDescriptions,3,false)),NOT(ISBLANK(A2:A))),filter(ARRAYFORMULA(VLOOKUP(B2:B&"",StudInfo,8,false)),NOT(ISBLANK(A2:A))),filter(ARRAYFORMULA(VLOOKUP(C2:C,offset(CourseInfo,,1),3,false)),NOT(ISBLANK(A2:A)))}`,
         I1: `=QUERY(A1:G,"Select F, G, C, E where F is not null order by A",1)`
       }
     },
@@ -316,12 +316,15 @@ const settingsTabs = (() => {
       reset: true,
       formulas: {
         A1: `=QUERY(copiedFinals!B1:I,"Select B, C, D, E, F, G, H  where B is not null AND I = 'F' order by B label B 'studlastfirst', C 'studentnumber', D 'coursename', E 'teacherlastfirst',G 'progress'",1)`,
-        J1: `={"docID";FILTER(ARRAYFORMULA(VLOOKUP(B2:B&"",StudInfo,8,false)),NOT(ISBLANK(A2:A)))}`,
+        J1: `={"docID"; ARRAYFORMULA(IF(ISBLANK(A2:A), "", XLOOKUP(B2:B&"", INDEX(StudInfo, 0, 1), INDEX(StudInfo, 0, 8), "BAD ID", 0)))}`,
         K1: `={"Teacher","Class / Course","Final Evaluation";D2:D,C2:C,G2:G}`
       },
       rngCell: "J1",
       rowTitle: "Final Evaluation",
-      statusCol: 15
+      statusCol: 15,
+      notes: {
+        J1: `Do not delete J1 to K1.  It has the right headers and formulas`
+      }
     },
     forGoalLinks: {
       name: 'forGoalLinks',
