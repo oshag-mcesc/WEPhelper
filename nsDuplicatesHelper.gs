@@ -32,7 +32,6 @@ SheetUtils.findHeaderIndices = (headerRow) => {
     const index = normalizedHeaders.indexOf(normalizedRequired);
     
     if (index === -1) {
-      Logger.log(`SheetUtils.findHeaderIndices: Required header "${requiredHeader}" not found in sheet.`);
       return null;
     }
     
@@ -62,17 +61,21 @@ SheetUtils.findHeaderIndices = (headerRow) => {
  * SheetUtils.highlightDuplicateRows();
  */
 SheetUtils.highlightDuplicateRows = () => {
-  const ss = SpreadsheetApp.getActiveSpreadsheet(); // Get the active spreadsheet
-  const sheet = ss.getActiveSheet(); // Get the active sheet
-  const sheetName = sheet.getName(); // Get the name of the active sheet
+  const ss = SpreadsheetApp.getActiveSpreadsheet();
+  const sheet = ss.getActiveSheet();
+  const sheetName = sheet.getName();
   
   try {
-    const range = sheet.getDataRange(); // Get the entire data range of the sheet
-    const values = range.getValues(); // Get all the values in the sheet
+    const range = sheet.getDataRange();
+    const values = range.getValues();
     
-    // If there's no data at all, log a message and exit.
+    // If there's no data at all, log error and exit
     if (values.length === 0) {
-      Logger.log("SheetUtils.highlightDuplicateRows: No data found in sheet. Exiting.");
+      logIt({
+        level: "severe",
+        theMsg: "No data found in sheet",
+        error: new Error(`Sheet "${sheetName}" contains no data`)
+      });
       return;
     }
     
@@ -83,72 +86,74 @@ SheetUtils.highlightDuplicateRows = () => {
     if (!headerIndices) {
       const missingHeaders = SheetUtils.REQUIRED_HEADERS.join('", "');
       const errorMsg = `Required column headers not found in sheet "${sheetName}". Please ensure the sheet has columns named: "${missingHeaders}".`;
-      Logger.log(`SheetUtils.highlightDuplicateRows: ${errorMsg}`);
+      logIt({
+        level: "severe",
+        theMsg: "Required column headers not found",
+        error: new Error(errorMsg)
+      });
       SpreadsheetApp.getUi().alert(errorMsg);
       return;
     }
     
-    Logger.log(`SheetUtils.highlightDuplicateRows: Processing sheet "${sheetName}". Found columns - Student ID: ${headerIndices["Student ID"]}, Course Name: ${headerIndices["Course Name"]}, Teacher Name: ${headerIndices["Teacher Name"]}`);
-    
-    // Clear existing background colors to ensure a clean highlight.
-    // This is important to remove highlights from previous runs or manual highlighting.
+    // Clear existing background colors to ensure a clean highlight
     range.setBackground(null);
     
-    // If there's only a header row, log a message and exit.
+    // If there's only a header row, exit (not an error condition)
     if (values.length <= 1) {
-      Logger.log("SheetUtils.highlightDuplicateRows: Only header row found, no data to process. Exiting.");
       return;
     }
     
-    // A Map to store unique keys and the row number (1-indexed) of their first occurrence.
+    // A Map to store unique keys and the row number (1-indexed) of their first occurrence
     const seenKeys = new Map();
-    // A Set to store row numbers (1-indexed) of all rows identified as duplicates.
+    // A Set to store row numbers (1-indexed) of all rows identified as duplicates
     const duplicateRows = new Set();
     
-    // Iterate over each row, starting from the second row (index 1) to skip the header.
+    // Iterate over each row, starting from the second row (index 1) to skip the header
     values.forEach((row, index) => {
-      // The `index` is 0-based, so for actual row numbers, add 1.
       const currentRowNumber = index + 1;
       if (index === 0) return; // Skip the header row (index 0)
       
-      // Extract the values for the unique key combination using the dynamically found column indices.
+      // Extract the values for the unique key combination using the dynamically found column indices
       const studentId = row[headerIndices["Student ID"]];
       const courseName = row[headerIndices["Course Name"]];
       const teacherName = row[headerIndices["Teacher Name"]];
       
-      // Create a unique key by concatenating the relevant fields.
-      // Using a delimiter like '|~|' ensures that combinations are distinct even with special characters.
+      // Create a unique key by concatenating the relevant fields
       const uniqueKey = `${studentId}|~|${courseName}|~|${teacherName}`;
       
-      // Check if the unique key has been seen before.
+      // Check if the unique key has been seen before
       if (seenKeys.has(uniqueKey)) {
-        // If the key exists, it means we've found a duplicate.
-        // Add both the current row and the row where this key was first encountered to the duplicate set.
-        duplicateRows.add(currentRowNumber); // Add current row number (1-indexed)
-        duplicateRows.add(seenKeys.get(uniqueKey)); // Add previously seen row number (1-indexed)
+        // If the key exists, it means we've found a duplicate
+        duplicateRows.add(currentRowNumber);
+        duplicateRows.add(seenKeys.get(uniqueKey));
       } else {
-        // If the key is new, add it to the map with its corresponding row number.
+        // If the key is new, add it to the map with its corresponding row number
         seenKeys.set(uniqueKey, currentRowNumber);
       }
     });
     
-    // Apply highlighting to all identified duplicate rows.
+    // Apply highlighting to all identified duplicate rows
     if (duplicateRows.size > 0) {
       const highlightColor = "#FFD966"; // Light orange color for duplicates
       duplicateRows.forEach(rowNum => {
-        // Get the range for the entire duplicate row.
-        // Parameters: startRow, startColumn, numRows, numColumns
         sheet.getRange(rowNum, 1, 1, sheet.getLastColumn()).setBackground(highlightColor);
       });
-      Logger.log(`SheetUtils.highlightDuplicateRows: Highlighted ${duplicateRows.size} duplicate rows.`);
+      Logger.log(`Highlighted ${duplicateRows.size} duplicate rows.`);
     } else {
-      Logger.log("SheetUtils.highlightDuplicateRows: No duplicate rows found.");
+      // No duplicates found - notify the user
+      SpreadsheetApp.getUi().alert(
+        "No Duplicates Found",
+        `No duplicate rows were found in sheet "${sheetName}".`,
+        SpreadsheetApp.getUi().ButtonSet.OK
+      );
     }
   } catch (error) {
-    // Catch and log any errors that occur during script execution.
-    // Use console.error for more detailed logging in the Apps Script logs.
-    console.error("SheetUtils.highlightDuplicateRows: Failed to highlight duplicate rows.", error);
-    // Alert the user that an error occurred for a better user experience.
-    SpreadsheetApp.getUi().alert("An error occurred. Please check the script logs (Extensions > Apps Script > Editor > Execution log) for details.");
+    // Log any errors that occur during script execution
+    logIt({
+      level: "severe",
+      theMsg: "Failed to highlight duplicate rows",
+      error: error
+    });
+    SpreadsheetApp.getUi().alert("An error occurred while highlighting duplicates. Please check the error logs for details.");
   }
 };

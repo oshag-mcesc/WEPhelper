@@ -30,7 +30,7 @@ const reset = (() => {
    */
   const resetEm = () => {
     const ss = SpreadsheetApp.getActiveSpreadsheet();
-    
+
     try {
       // Notify user that reset process has started
       SpreadsheetApp.getActiveSpreadsheet().toast("Resetting spreadsheet for new year...", "Starting Reset", -1);
@@ -140,8 +140,9 @@ const reset = (() => {
         sheet.deleteColumns(27, maxColumns - 26);
       }
 
-      // Clear all existing content
+      // Clear all existing content and conditional format rules to start fresh
       sheet.clearContents();
+      sheet.clearConditionalFormatRules(); // <-- Clears old conditional rules automatically
 
       // Batch operation 2: Set headers if provided in configuration
       if (tabConfig.headers) {
@@ -154,7 +155,52 @@ const reset = (() => {
           sheet.getRange(cell).setFormula(tabConfig.formulas[cell]);
         }
       }
+
+      // Batch operation 4: Set notes if provided in configuration
+      if (tabConfig.notes) {
+        for (const cell in tabConfig.notes) {
+          sheet.getRange(cell).setNote(tabConfig.notes[cell]);
+        }
+      }
+
+      // Dynamic Batch operation 5: Apply Conditional Formatting if configured
+      if (tabConfig.conditionalFormat) {
+        const cf = tabConfig.conditionalFormat;
+        const range = sheet.getRange(cf.rangeA1);
+
+        // 1. Initialize the base rule builder using configuration properties
+        let ruleBuilder = SpreadsheetApp.newConditionalFormatRule()
+          .setBackground(cf.backgroundColor)
+          .setFontColor(cf.fontColor)
+          .setRanges([range]);
+
+        // 2. Dynamically apply the criteria rule type
+        switch (cf.criterionType) {
+          case "CUSTOM_FORMULA":
+            ruleBuilder.whenFormulaSatisfied(cf.value);
+            break;
+          case "TEXT_CONTAINS":
+            ruleBuilder.whenTextContains(cf.value);
+            break;
+          case "TEXT_IS_EMPTY":
+            ruleBuilder.whenCellIsEmpty();
+            break;
+          case "NUMBER_GREATER_THAN":
+            ruleBuilder.whenNumberGreaterThan(Number(cf.value));
+            break;
+          default:
+            console.log(`Warning: Unknown criterionType "${cf.criterionType}" on sheet ${sheet.getName()}`);
+            return;
+        }
+
+        // 3. Build and push the rule to the sheet
+        const rule = ruleBuilder.build();
+        const currentRules = sheet.getConditionalFormatRules();
+        currentRules.push(rule);
+        sheet.setConditionalFormatRules(currentRules);
+      }
     }
+
 
     /**
      * Sets up the config tab with proper structure, positioning, and visibility.
@@ -227,164 +273,208 @@ var reset1 = reset;
  */
 const settingsTabs = (() => {
   const ns = {};
-  
+
   /**
    * @property {Object.<string, TabConfiguration>} tabs
    * @description Object containing all tab configurations indexed by tab identifier.
    * Each tab configuration defines how that tab should be handled during reset operations.
    */
-  ns.tabs = {
-    template1: {
-      name: 'Template 1',
-      reset: false
-    },
-    original: {
-      name: 'ORIGINAL',
-      reset: true,
-      headers: ['SchoolCode', 'StudentNumber', 'StateStudentId', 'FirstName', 'LastName', 'Gender', 'GradeLevelCode', 'HomeSchoolIRN', 'HomeSchool', 'ProgramCode', 'ProgramName', 'Status', 'StudentStatusCode', 'CourseCode', 'CourseName', 'CourseTypeCode', 'CourseTypeDescription', 'SectionNumber', 'TermCode', 'TermName', 'LocationEx', 'TeacherCode', 'CalendarPeriodCode', 'RotationDays']
-    },
-    rawData: {
-      name: 'rawData',
-      reset: true,
-      formulas: {
-        A1: `=filter(original!A1:X,MATCH(original!N1:N&"",index(CourseInfo,,1),0))`
-      }
-    },
-    gifted: {
-      name: 'gifted',
-      reset: true,
-      formulas: {
-        A1: `=filter(rawdata!A1:X,{TRUE; MATCH(rawdata!B2:B&"",index(StudInfo,,1),0)})`
-      }
-    },
-    preQuery: {
-      name: 'preQuery',
-      reset: true,
-      formulas: {
-        A1: `=query(gifted!A1:W,"select E, D, F, B, G, N, O, A, V,W where A is not null label G 'Grade', E 'StudLast', D 'StudFirst', B 'studentnumber', O 'Course', W 'Period'", 1)`,
-        K1: `={"GiftedArea","GiftedCourse";arrayformula(if(isblank(D2:D),,VLOOKUP(D2:D,StudInfo,6,false))),arrayformula(if(isblank(F2:F),,VLOOKUP(F2:F,CourseInfo,4,false)))}`,
-        N1: `={"StudLastFirst","TeacherLastFirst","TeacherEmail";arrayformula(if(isblank(D2:D),,VLOOKUP(D2:D,StudInfo,2,false))),arrayformula(if(isblank(I2:I),,VLOOKUP(I2:I,TeacherInfo,2,false))),arrayformula(if(isblank(I2:I),,VLOOKUP(I2:I,TeacherInfo,5,false)))}`
-      }
-    },
-    theGiftedData: {
-      name: 'theGiftedData',
-      reset: true,
-      formulas: {
-        A1: `=query(preQuery!A1:P,"Select * where M <> 'NONE'and A is not null order by A",1)`,
-        Q1: `="New"`,
-        U1: `={D1:D,G1:G,N1:O}`
-      }
-    },
-    forGoalLinks: {
-      name: 'forGoalLinks',
-      reset: true,
-      formulas: {
-        A1: `=query(theGiftedData!A1:Q,"Select N,D,M,O,G,P where A<>'' and Q ='Y' order by O,N",1)`
-      }
-    },
-    tcg: {
-      name: 'TeacherCourseGifted',
-      reset: false
-    },
-    forDocs: {
-      name: 'forDocs',
-      reset: true,
-      formulas: {
-        A1: `=query(StudInfo,"Select N, O, P, Q, R, S, T  where U is null order by O",1)`,
-        H1: `={"filename";arrayformula(if(NOT(ISBLANK(A2:A)),B2:B & " " & A2:A,))}`
-      }
-    },
-    docIds: {
-      name: 'docIds',
-      reset: true
-    },
-    copiedGoals: {
-      name: 'copiedGoals',
-      reset: true,
-      formulas: {
-        J1: `={"ODEISandcode";FILTER(ARRAYFORMULA(VLOOKUP(F2:F,OFFSET(CourseInfo,,1),2,false)),NOT(ISBLANK(C2:C)))}`,
-        K1: `="New"`,
-        L1: `={"teacherEmail";arrayformula(if(NOT(ISBLANK(E2:E)),VLOOKUP(E2:E,OFFSET(TeacherInfo,,1),4,false),))}`
-      }
-    },
-    forClasses: {
-      name: 'forClasses',
-      reset: true,
-      formulas: {
-        A1: `=query(copiedGoals!B1:K,"Select B, C, F, J where B is not null AND K ='Y' order by B", 1)`,
-        E1: `={"codeDescription","docID","courseGifted";filter(ARRAYFORMULA(VLOOKUP(D2:D+0,emisDescriptions,3,false)),NOT(ISBLANK(A2:A))),filter(ARRAYFORMULA(VLOOKUP(B2:B&"",StudInfo,8,false)),NOT(ISBLANK(A2:A))),filter(ARRAYFORMULA(VLOOKUP(C2:C,offset(CourseInfo,,1),3,false)),NOT(ISBLANK(A2:A)))}`,
-        I1: `=QUERY(A1:G,"Select F, G, C, E where F is not null order by A",1)`
-      }
-    },
-    forGoals: {
-      name: 'forGoals',
-      reset: true,
-      formulas: {
-        A1: `=QUERY(copiedGoals!B1:K,"Select * where B is not null AND K='Y' order by B label B 'studlastfirst', C 'studentnumber', D 'giftedarea', E 'teacherlastfirst', F 'coursename',G 'instructionalstrategies', H 'assesstools', J 'odeisandcode'",1)`,
-        L1: `={"docID";FILTER(ARRAYFORMULA(VLOOKUP(B2:B&"",StudInfo,8,false)),NOT(ISBLANK(A2:A)))}`,
-        M1: `={"Teacher","Class / Course","Content Goal";D2:D,E2:E,H2:H}`
-      }
-    },
-    forMidYear: {
-      name: 'forMidYear',
-      reset: true,
-      formulas: {
-        A1: `=QUERY(copiedGoals!B1:L,"Select B, C, E, F, I, L where B is not null AND K='Y' order by E label B 'StudLastFirst', E 'teacherlastfirst', C 'studentnumber', L 'teacheremail', I 'goal', F 'coursename'",1)`
-      }
-    },
-    copiedMidYears: {
-      name: 'copiedMidYears',
-      reset: true,
-      formulas: {
-        H1: `="New"`
-      }
-    },
-    forMidYearPush: {
-      name: 'forMidYearPush',
-      reset: true,
-      formulas: {
-        A1: `=QUERY(copiedMidYears!B2:H,"Select B, C, D, E, F, G  where B is not null AND H = 'Y' order by B label B 'studlastfirst', C 'studentnumber', D 'coursename', E 'teacherlastfirst',F 'goal',G 'progress'",1)`,
-        I1: `={"docID";FILTER(ARRAYFORMULA(VLOOKUP(B2:B&"",StudInfo,8,false)),NOT(ISBLANK(A2:A)))}`,
-        J1: `={"Teacher","Class / Course","Progress";D2:D,C2:C,F2:F}`
-      },
-      rngCell:"I1",
-      rowTitle:"Mid Year Progress",
-      statusCol:14 //column N
-    },
-    forFinalEvaluation: {
-      name: 'forFinalEvaluation',
-      reset: true,
-      formulas: {
-        A1: `=QUERY(copiedMidYears!B1:I,"Select B, C, D, E, F, G, H, I where B is not null AND H = 'Y' order by E label B 'StudLastFirst', E 'teacherlastfirst', C 'studentnumber', I 'teacheremail', F 'goal', D 'coursename'",1)`
-      }
-    },
-    copiedFinals: {
-      name: 'copiedFinals',
-      reset: true,
-      formulas: {
-        I1: `="New"`
-      }
-    },
-    forFinalPush: {
-      name: 'forFinalPush',
-      reset: true,
-      formulas: {
-        A1: `=QUERY(copiedFinals!B1:I,"Select B, C, D, E, F, G, H  where B is not null AND I = 'Y' order by B label B 'studlastfirst', C 'studentnumber', D 'coursename', E 'teacherlastfirst',G 'progress'",1)`,
-        J1: `={"docID";FILTER(ARRAYFORMULA(VLOOKUP(B2:B&"",StudInfo,8,false)),NOT(ISBLANK(A2:A)))}`,
-        K1: `={"Teacher","Class / Course","Progress";D2:D,C2:C,F2:F}`
-      },
-      rngCell:"J1",
-      rowTitle:"Final Evaluation",
-      statusCol:15  // column O
-    },
-    config: {
-      name: 'config',
-      reset: false,
-      createIfMissing: true,
-      hideAfterReset: true,
-      keys: ["WEPtemplateID", "MainWEPfolderID", "InitialGoalsFormID", "MidYearProgressFormID", "FinalProgressFormID", "rowNum","subject","greeting","closing","linktime"]
-    }
-  };
+ns.tabs = {
+   config: {
+     name: 'config',
+     reset: false,
+     createIfMissing: true,
+     hideAfterReset: true,
+     keys: ["WEPtemplateID", "MainWEPfolderID", "InitialGoalsFormID", "MidYearProgressFormID", "FinalProgressFormID", "rowNum", "subject", "greeting", "closing", "linktime"]
+   },
+   copiedFinals: {
+     name: 'copiedFinals',
+     reset: true,
+     formulas: {
+       I1: `="New"`
+     },
+     notes: {
+       I1: `Use F for Final push`
+     }
+   },
+   copiedGoals: {
+     name: 'copiedGoals',
+     reset: true,
+     formulas: {
+       J1: `={"ODEISandcode";FILTER(ARRAYFORMULA(VLOOKUP(F2:F,OFFSET(CourseInfo,,1),2,false)),NOT(ISBLANK(C2:C)))}`,
+       K1: `="New"`,
+       L1: `={"teacheremail";ARRAYFORMULA(IF(A2:A="","",IF(C2:C="","MISSING ID",IFERROR(VLOOKUP(E2:E, OFFSET(TeacherInfo,,1), 4, FALSE),"MISSING EMAIL"))))}`,
+       U1: `=QUERY(B1:L, "Select C, F, B, E where C is not null",1)`
+     },
+     notes: {
+       K1: `Use Y to push classes and goals`
+     }
+   },
+   copiedMidYears: {
+     name: 'copiedMidYears',
+     reset: true,
+     formulas: {
+       H1: `="New"`,
+       I1: `={"teacheremail";ARRAYFORMULA(IF(A2:A="","",IF(C2:C="","MISSING ID",IFERROR(VLOOKUP(E2:E, OFFSET(TeacherInfo,,1), 4, FALSE),"MISSING EMAIL"))))}`,
+       U1: `=QUERY(B1:L, "Select C, D, B, E where C is not null",1)`
+     },
+     notes: {
+       H1: `Use F for final links\nUse M for midyear push`
+     }
+   },
+   docIds: {
+     name: 'docIds',
+     reset: true
+   },
+   forClasses: {
+     name: 'forClasses',
+     reset: true,
+     formulas: {
+       A1: `=query(copiedGoals!B1:K,"Select B, C, F, J where B is not null AND K ='Y' order by B", 1)`,
+       E1: `={"codeDescription","docID","courseGifted"; ARRAYFORMULA(IF(ISBLANK(A2:A), "", { XLOOKUP(D2:D+0, INDEX(emisDescriptions, 0, 1), INDEX(emisDescriptions, 0, 3), "MISSING DESC", 0), XLOOKUP(B2:B&"", INDEX(StudInfo, 0, 1), INDEX(StudInfo, 0, 8), "BAD ID", 0), XLOOKUP(C2:C, INDEX(CourseInfo, 0, 2), INDEX(CourseInfo, 0, 4), "MISSING COURSE", 0) }))}`,
+       I1: `=QUERY(A1:G,"Select F, G, C, E where F is not null order by A",1)`
+     },
+     conditionalFormat: {
+       rangeA1: "I2:I1000",
+       backgroundColor: "#FFC7CE",
+       fontColor: "#9C0006",
+       criterionType: "CUSTOM_FORMULA",
+       value: '=COUNTIF($I$2:$I, "BAD ID") > 0'
+     }
+   },
+   forDocs: {
+     name: 'forDocs',
+     reset: true,
+     formulas: {
+       A1: `=query(StudInfo,"Select N, O, P, Q, R, S, T  where U is null order by O",1)`,
+       H1: `={"filename";arrayformula(if(NOT(ISBLANK(A2:A)),B2:B & " " & A2:A,))}`
+     }
+   },
+   forFinalEvaluation: {
+     name: 'forFinalEvaluation',
+     reset: true,
+     formulas: {
+       A1: `=QUERY(copiedMidYears!B1:I,"Select B, C, D, E, F, G, H, I where B is not null AND H = 'F' order by E label B 'StudLastFirst', E 'teacherlastfirst', C 'studentnumber', I 'teacheremail', F 'goal', D 'coursename'",1)`
+     }
+   },
+   forFinalPush: {
+     name: 'forFinalPush',
+     reset: true,
+     formulas: {
+       A1: `=QUERY(copiedFinals!B1:I,"Select B, C, D, E, F, G, H  where B is not null AND I = 'F' order by B label B 'studlastfirst', C 'studentnumber', D 'coursename', E 'teacherlastfirst',G 'progress'",1)`,
+       J1: `={"docID"; ARRAYFORMULA(IF(ISBLANK(A2:A), "", XLOOKUP(B2:B&"", INDEX(StudInfo, 0, 1), INDEX(StudInfo, 0, 8), "BAD ID", 0)))}`,
+       K1: `={"Teacher","Class / Course","Final Evaluation";D2:D,C2:C,G2:G}`
+     },
+     rngCell: "J1",
+     rowTitle: "Final Evaluation",
+     statusCol: 15,
+     notes: {
+       J1: `Do not delete J1 to K1.  It has the right headers and formulas`
+     },
+     conditionalFormat: {
+       rangeA1: "J2:J1000",
+       backgroundColor: "#FFC7CE",
+       fontColor: "#9C0006",
+       criterionType: "CUSTOM_FORMULA",
+       value: '=COUNTIF($J$2:$J, "BAD ID") > 0'
+     }
+   },
+   forGoalLinks: {
+     name: 'forGoalLinks',
+     reset: true,
+     formulas: {
+       A1: `=query(theGiftedData!A1:Q,"Select N,D,M,O,G,P where A<>'' and Q ='Y' order by O,N",1)`
+     }
+   },
+   forGoals: {
+     name: 'forGoals',
+     reset: true,
+     formulas: {
+       A1: `=QUERY(copiedGoals!B1:K,"Select * where B is not null AND K='Y' order by B label B 'studlastfirst', C 'studentnumber', D 'giftedarea', E 'teacherlastfirst', F 'coursename',G 'instructionalstrategies', H 'assesstools', J 'odeisandcode'",1)`,
+       L1: `={"docID";FILTER(ARRAYFORMULA(VLOOKUP(B2:B&"",StudInfo,8,false)),NOT(ISBLANK(A2:A)))}`,
+       M1: `={"Teacher","Class / Course","Instructional Strategies for Service","Measures to Determine Student Growth","Content Goal";D2:H}`
+     },
+    conditionalFormat: {
+       rangeA1: "L2:L1000",
+       backgroundColor: "#FFC7CE",
+       fontColor: "#9C0006",
+       criterionType: "CUSTOM_FORMULA",
+       value: '=COUNTIF($L$2:$L, "BAD ID") > 0'
+     }
+   },
+   forMidYear: {
+     name: 'forMidYear',
+     reset: true,
+     formulas: {
+       A1: `=QUERY(copiedGoals!B1:L,"Select B, C, E, F, I, L where B is not null AND K='Y' order by E label B 'StudLastFirst', E 'teacherlastfirst', C 'studentnumber', L 'teacheremail', I 'goal', F 'coursename'",1)`
+     }
+   },
+   forMidYearPush: {
+     name: 'forMidYearPush',
+     reset: true,
+     formulas: {
+       A1: `=QUERY(copiedMidYears!B1:H,"Select B, C, D, E, F, G  where B is not null AND H = 'M' order by B label B 'studlastfirst', C 'studentnumber', D 'coursename', E 'teacherlastfirst',F 'goal',G 'progress'",1)`,
+       I1: `={"docID"; ARRAYFORMULA(IF(ISBLANK(A2:A), "", XLOOKUP(B2:B&"", INDEX(StudInfo, 0, 1), INDEX(StudInfo, 0, 8), "BAD ID", 0)))}`,
+       J1: `={"Teacher","Class / Course","Progress";D2:D,C2:C,F2:F}`
+     },
+     rngCell: "I1",
+     rowTitle: "Mid Year Progress",
+     statusCol: 14,
+     conditionalFormat: {
+       rangeA1: "I2:I1000",
+       backgroundColor: "#FFC7CE",
+       fontColor: "#9C0006",
+       criterionType: "CUSTOM_FORMULA",
+       value: '=COUNTIF($I$2:$I, "BAD ID") > 0'
+     }
+   },
+   gifted: {
+     name: 'gifted',
+     reset: true,
+     formulas: {
+       A1: `=filter(rawdata!A1:X,{TRUE; MATCH(rawdata!B2:B&"",index(StudInfo,,1),0)})`
+     }
+   },
+   original: {
+     name: 'ORIGINAL',
+     reset: true,
+     headers: ['SchoolCode', 'StudentNumber', 'StateStudentId', 'FirstName', 'LastName', 'Gender', 'GradeLevelCode', 'HomeSchoolIRN', 'HomeSchool', 'ProgramCode', 'ProgramName', 'Status', 'StudentStatusCode', 'CourseCode', 'CourseName', 'CourseTypeCode', 'CourseTypeDescription', 'SectionNumber', 'TermCode', 'TermName', 'LocationEx', 'TeacherCode', 'CalendarPeriodCode', 'RotationDays']
+   },
+   preQuery: {
+     name: 'preQuery',
+     reset: true,
+     formulas: {
+       A1: `=query(gifted!A1:W,"select E, D, F, B, G, N, O, A, V,W where A is not null label G 'Grade', E 'StudLast', D 'StudFirst', B 'studentnumber', O 'Course', W 'Period'", 1)`,
+       K1: `={"GiftedArea","GiftedCourse";arrayformula(if(isblank(D2:D),,VLOOKUP(D2:D,StudInfo,6,false))),arrayformula(if(isblank(F2:F),,VLOOKUP(F2:F,CourseInfo,4,false)))}`,
+       N1: `={"StudLastFirst","TeacherLastFirst","TeacherEmail";arrayformula(if(isblank(D2:D),,VLOOKUP(D2:D,StudInfo,2,false))),arrayformula(if(isblank(I2:I),,VLOOKUP(I2:I,TeacherInfo,2,false))),arrayformula(if(isblank(I2:I),,VLOOKUP(I2:I,TeacherInfo,5,false)))}`
+     }
+   },
+   rawData: {
+     name: 'rawData',
+     reset: true,
+     formulas: {
+       A1: `=filter(original!A1:X,MATCH(original!N1:N&"",index(CourseInfo,,1),0))`
+     }
+   },
+   tcg: {
+     name: 'TeacherCourseGifted',
+     reset: false
+   },
+   template1: {
+     name: 'Template 1',
+     reset: false
+   },
+   theGiftedData: {
+     name: 'theGiftedData',
+     reset: true,
+     formulas: {
+       A1: `=query(preQuery!A1:P,"Select * where M <> 'NONE'and A is not null order by A",1)`,
+       Q1: `="New"`,
+       U1: `={D1:D,G1:G,N1:O}`
+     }
+   }
+ };
+
 
   return ns;
 })();

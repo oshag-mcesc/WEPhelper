@@ -90,6 +90,8 @@ const nsEmailer = (function () {
 
         // Send progress notification
         showProgress(true);
+        // Variable for bad email counting
+        const failures = [];
 
         for (let i = 0; i < teachEmail.length; i++) {
           const data = info.filter(row => teachEmail[i] === row[0]);
@@ -101,19 +103,43 @@ const nsEmailer = (function () {
             greeting: emailSettings.greeting,
             closing: emailSettings.closing
           };
-
-          sendTheMail(emailInfo);
+          //ADDED 4/230/2026 to catch bad emails BUT to keep sending
+          try {
+            sendTheMail(emailInfo);
+          } catch (err) {
+            logIt({
+              level: "severe",
+              theMsg: `Failed to send email to ${teachEmail[i]} — skipping`,
+              error: err
+            });
+            failures.push({
+              email: teachEmail[i],
+              error: err.message
+            });
+          }
         }
 
         showProgress(false);
         done = true;
 
-        logIt({
-          level: "info",
-          theMsg: `Successfully sent emails to ${teachEmail.length} recipients`
-        });
-
-        ui.alert('Success!', `Emails sent successfully to ${teachEmail.length} recipients.`, ui.ButtonSet.OK);
+        if (failures.length > 0) {
+          writeEmailErrors(failures);
+          logIt({
+            level: "severe",
+            theMsg: `Email sending complete. ${teachEmail.length - failures.length} sent, ${failures.length} failed.`
+          });
+          ui.alert(
+            'Completed with errors',
+            `Emails sent: ${teachEmail.length - failures.length}\nFailed: ${failures.length}\n\nSee the "Email Errors" tab for details.`,
+            ui.ButtonSet.OK
+          );
+        } else {
+          logIt({
+            level: "info",
+            theMsg: `Successfully sent emails to ${teachEmail.length} recipients`
+          });
+          ui.alert('Success!', `Emails sent successfully to ${teachEmail.length} recipients.`, ui.ButtonSet.OK);
+        }
 
       } else {
         // User clicked "No" or X in the title bar
@@ -240,12 +266,92 @@ const nsEmailer = (function () {
     }
   }
 
+/**
+ * Writes email sending failures to a dedicated "Email Errors" tab in the active spreadsheet.
+ *
+ * If the tab does not exist, it is created automatically. If it already exists,
+ * its contents are cleared before writing new data, ensuring only the most
+ * recent run's failures are displayed.
+ *
+ * Each failure is logged with a timestamp, the recipient's email address, and
+ * the associated error message. The header row is bolded, frozen, and all
+ * columns are auto-resized for readability.
+ *
+ * @function writeEmailErrors
+ * @param {Object[]} failures - Array of failure objects from the email sending process.
+ * @param {string}   failures[].email - The recipient's email address that failed.
+ * @param {string}   failures[].error - The error message describing why the send failed.
+ * @returns {void}
+ *
+ * @example
+ * const failures = [
+ *   { email: "user@example.com", error: "Invalid address" },
+ *   { email: "other@example.com", error: "Quota exceeded" }
+ * ];
+ * writeEmailErrors(failures);
+ */
+function writeEmailErrors(failures) {
+  try {
+    // Get a reference to the currently active spreadsheet
+    const ss = SpreadsheetApp.getActiveSpreadsheet();
+
+    const tabName = "Email Errors";
+
+    // Attempt to find an existing "Email Errors" sheet
+    let ws = ss.getSheetByName(tabName);
+
+    if (!ws) {
+      // Sheet doesn't exist yet — create it fresh
+      ws = ss.insertSheet(tabName);
+    } else {
+      // Sheet already exists — wipe prior run's data before writing new errors
+      ws.clearContents();
+    }
+
+    // Write the header row as the first row in the sheet
+    ws.appendRow(["Timestamp", "Recipient Email", "Error Message"]);
+
+    // Capture a single timestamp to apply uniformly to all failures in this run
+    const timestamp = new Date().toLocaleString();
+
+    // Iterate over each failure object and write it as its own row
+    failures.forEach(f => {
+      ws.appendRow([timestamp, f.email, f.error]);
+    });
+
+    // --- Formatting ---
+
+    // Bold the header row (row 1, columns 1–3) to visually distinguish it from data rows
+    ws.getRange(1, 1, 1, 3).setFontWeight("bold");
+
+    // Freeze the header row so it stays visible when scrolling through many errors
+    ws.setFrozenRows(1);
+
+    // Auto-resize all three columns to fit their content without manual adjustment
+    ws.autoResizeColumns(1, 3);
+
+    // Log a success message indicating how many errors were written
+    logIt({
+      level: "info",
+      theMsg: `Wrote ${failures.length} email error(s) to "${tabName}" tab`
+    });
+
+  } catch (err) {
+    // If anything above throws, log it as a severe error rather than letting it fail silently
+    logIt({
+      level: "severe",
+      theMsg: "Failed to write email errors to sheet",
+      error: err
+    });
+  }
+}
   // Return public interface
   return {
     emailLinks: emailLinks,
     sendTheMail: sendTheMail,
     getEmailSettings: getEmailSettings,
-    showProgress: showProgress
+    showProgress: showProgress,
+    writeEmailErrors: writeEmailErrors
   };
 
 })();

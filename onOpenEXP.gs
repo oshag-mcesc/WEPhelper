@@ -35,7 +35,7 @@ function onOpen() {
       .addItem("Test Log", "WEPhelper.testLog1"))
     .addSeparator()
     .addSubMenu(ui.createMenu('Helpers')
-      .addItem('Get DocID list', 'getDocIdList')
+      .addItem('Get DocID list', 'WEPhelper.helper_getListOfDocIds')
       .addItem('Quick DocID list', 'quickDocList')
       .addItem('Delete files in folder', 'deleteTheFiles')
       .addItem('Toggle Tab Visibility', 'toggleTabVisibility'))

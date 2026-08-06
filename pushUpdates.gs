@@ -9,11 +9,11 @@
 //These 2 functions are called from the menu.
 //They use nsConfig info to send to the "middle man" function
 const pushMidUpdate1 = ()=>{
-  configPushUpdates(nsSettings.tabs.forMidYearPush)
+  configPushUpdates(nsConfig.tabs.forMidYearPush)
 }
 
 const pushFinalUpdate1 = ()=>{
-  configPushUpdates(nsSettings.tabs.forFinalPush)
+  configPushUpdates(nsConfig.tabs.forFinalPush)
 }
 
 //needed to be called from the library
@@ -50,7 +50,7 @@ const configPushUpdates = (updateObj) => {
     errorsTab.getRange(errorsTab.getLastRow()+1,1,rslt.errors.length,rslt.errors[0].length).setValues(rslt.errors)
     SpreadsheetApp.getActiveSpreadsheet().toast("There has been an error.  Check the errors tab","Uh - oh!!",-1)
   }else{
-    SpreadsheetApp.getActiveSpreadsheet().toast(`Done with updating ${rowTitle}`,"Done!", 5)
+    SpreadsheetApp.getActiveSpreadsheet().toast(`Done with updating ${rowTitle}`,"Done!", -1)
   }
   // console.log(rslt.anyErrors);
   // console.log(rslt.errors);
